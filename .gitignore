@@ -1,5 +1,6 @@
 #Generated from ioc
 /Drivers
+!Drivers/BSP/*
 /USB_HOST
 /build
 /Middlewares
@@ -20,3 +21,4 @@
 
 #Misc
 *.mxproject
+
