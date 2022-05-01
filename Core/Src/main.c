@@ -64,12 +64,71 @@ UART_HandleTypeDef huart6;
 SRAM_HandleTypeDef hsram1;
 SRAM_HandleTypeDef hsram2;
 
-/* Definitions for defaultTask */
-osThreadId_t defaultTaskHandle;
-const osThreadAttr_t defaultTask_attributes = {
-  .name = "defaultTask",
+/* Definitions for generateProblem */
+osThreadId_t generateProblemHandle;
+const osThreadAttr_t generateProblem_attributes = {
+  .name = "generateProblem",
   .priority = (osPriority_t) osPriorityBelowNormal,
   .stack_size = 128 * 4
+};
+/* Definitions for dotTask */
+osThreadId_t dotTaskHandle;
+const osThreadAttr_t dotTask_attributes = {
+  .name = "dotTask",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for dashTask */
+osThreadId_t dashTaskHandle;
+const osThreadAttr_t dashTask_attributes = {
+  .name = "dashTask",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for spaceTask */
+osThreadId_t spaceTaskHandle;
+const osThreadAttr_t spaceTask_attributes = {
+  .name = "spaceTask",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for displayChoice */
+osThreadId_t displayChoiceHandle;
+const osThreadAttr_t displayChoice_attributes = {
+  .name = "displayChoice",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for checkChoice */
+osThreadId_t checkChoiceHandle;
+const osThreadAttr_t checkChoice_attributes = {
+  .name = "checkChoice",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for displayInc */
+osThreadId_t displayIncHandle;
+const osThreadAttr_t displayInc_attributes = {
+  .name = "displayInc",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for displayCorr */
+osThreadId_t displayCorrHandle;
+const osThreadAttr_t displayCorr_attributes = {
+  .name = "displayCorr",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
+/* Definitions for displayMutex */
+osMutexId_t displayMutexHandle;
+const osMutexAttr_t displayMutex_attributes = {
+  .name = "displayMutex"
+};
+/* Definitions for ledMutex */
+osMutexId_t ledMutexHandle;
+const osMutexAttr_t ledMutex_attributes = {
+  .name = "ledMutex"
 };
 /* USER CODE BEGIN PV */
 
@@ -89,7 +148,14 @@ static void MX_QUADSPI_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_UART10_Init(void);
 static void MX_USART6_UART_Init(void);
-void StartFunctionPull(void *argument);
+void generateProblemHandler(void *argument);
+void dotHandler(void *argument);
+void dashHandler(void *argument);
+void spaceHandler(void *argument);
+void displayChoiceHandler(void *argument);
+void checkChoiceHandler(void *argument);
+void displayIncorrectHandler(void *argument);
+void displayCorrectHandler(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -145,6 +211,12 @@ int main(void)
 
   /* Init scheduler */
   osKernelInitialize();
+  /* Create the mutex(es) */
+  /* creation of displayMutex */
+  displayMutexHandle = osMutexNew(&displayMutex_attributes);
+
+  /* creation of ledMutex */
+  ledMutexHandle = osMutexNew(&ledMutex_attributes);
 
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
@@ -163,8 +235,29 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of defaultTask */
-  defaultTaskHandle = osThreadNew(StartFunctionPull, NULL, &defaultTask_attributes);
+  /* creation of generateProblem */
+  generateProblemHandle = osThreadNew(generateProblemHandler, NULL, &generateProblem_attributes);
+
+  /* creation of dotTask */
+  dotTaskHandle = osThreadNew(dotHandler, NULL, &dotTask_attributes);
+
+  /* creation of dashTask */
+  dashTaskHandle = osThreadNew(dashHandler, NULL, &dashTask_attributes);
+
+  /* creation of spaceTask */
+  spaceTaskHandle = osThreadNew(spaceHandler, NULL, &spaceTask_attributes);
+
+  /* creation of displayChoice */
+  displayChoiceHandle = osThreadNew(displayChoiceHandler, NULL, &displayChoice_attributes);
+
+  /* creation of checkChoice */
+  checkChoiceHandle = osThreadNew(checkChoiceHandler, NULL, &checkChoice_attributes);
+
+  /* creation of displayInc */
+  displayIncHandle = osThreadNew(displayIncorrectHandler, NULL, &displayInc_attributes);
+
+  /* creation of displayCorr */
+  displayCorrHandle = osThreadNew(displayCorrectHandler, NULL, &displayCorr_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -670,7 +763,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_WritePin(GPIOB, LCD_CTP_RST_Pin|LCD_TE_Pin|WIFI_WKUP_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOG, USB_OTG_FS_PWR_EN_Pin|ARD_D2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(USB_OTG_FS_PWR_EN_GPIO_Port, USB_OTG_FS_PWR_EN_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : LED1_RED_Pin MEMS_LED_Pin LCD_BL_CTRL_Pin */
   GPIO_InitStruct.Pin = LED1_RED_Pin|MEMS_LED_Pin|LCD_BL_CTRL_Pin;
@@ -687,13 +780,11 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF3_TIM9;
   HAL_GPIO_Init(ARD_D5_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D3_Pin */
-  GPIO_InitStruct.Pin = ARD_D3_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  /*Configure GPIO pins : PF6 PF7 PF10 SD_Detect_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_10|SD_Detect_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  GPIO_InitStruct.Alternate = GPIO_AF2_TIM5;
-  HAL_GPIO_Init(ARD_D3_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
   /*Configure GPIO pin : CTP_INT_Pin */
   GPIO_InitStruct.Pin = CTP_INT_Pin;
@@ -722,12 +813,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
   HAL_GPIO_Init(ARD_D6_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : SD_Detect_Pin */
-  GPIO_InitStruct.Pin = SD_Detect_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(SD_Detect_GPIO_Port, &GPIO_InitStruct);
-
   /*Configure GPIO pins : ARD_D15_Pin ARD_D14_Pin */
   GPIO_InitStruct.Pin = ARD_D15_Pin|ARD_D14_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
@@ -751,18 +836,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : USB_OTG_FS_OVRCR_Pin CODEC_INT_Pin */
-  GPIO_InitStruct.Pin = USB_OTG_FS_OVRCR_Pin|CODEC_INT_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : USB_OTG_FS_PWR_EN_Pin ARD_D2_Pin */
-  GPIO_InitStruct.Pin = USB_OTG_FS_PWR_EN_Pin|ARD_D2_Pin;
+  /*Configure GPIO pin : USB_OTG_FS_PWR_EN_Pin */
+  GPIO_InitStruct.Pin = USB_OTG_FS_PWR_EN_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+  HAL_GPIO_Init(USB_OTG_FS_PWR_EN_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : ARD_D10_Pin */
   GPIO_InitStruct.Pin = ARD_D10_Pin;
@@ -772,6 +851,12 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
   HAL_GPIO_Init(ARD_D10_GPIO_Port, &GPIO_InitStruct);
 
+  /*Configure GPIO pins : PG13 CODEC_INT_Pin */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|CODEC_INT_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
   /*Configure GPIO pins : ARD_D12_Pin ARD_D11_Pin */
   GPIO_InitStruct.Pin = ARD_D12_Pin|ARD_D11_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
@@ -779,12 +864,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : ARD_D4_Pin */
-  GPIO_InitStruct.Pin = ARD_D4_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(ARD_D4_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : ARD_D9_Pin */
   GPIO_InitStruct.Pin = ARD_D9_Pin;
@@ -889,14 +968,14 @@ static void MX_FSMC_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_StartFunctionPull */
+/* USER CODE BEGIN Header_generateProblemHandler */
 /**
-  * @brief  Function implementing the defaultTask thread.
+  * @brief  Function implementing the generateProblem thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_StartFunctionPull */
-void StartFunctionPull(void *argument)
+/* USER CODE END Header_generateProblemHandler */
+void generateProblemHandler(void *argument)
 {
   /* init code for USB_HOST */
   MX_USB_HOST_Init();
@@ -907,6 +986,132 @@ void StartFunctionPull(void *argument)
     osDelay(1);
   }
   /* USER CODE END 5 */
+}
+
+/* USER CODE BEGIN Header_dotHandler */
+/**
+* @brief Function implementing the dotTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_dotHandler */
+void dotHandler(void *argument)
+{
+  /* USER CODE BEGIN dotHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END dotHandler */
+}
+
+/* USER CODE BEGIN Header_dashHandler */
+/**
+* @brief Function implementing the dashTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_dashHandler */
+void dashHandler(void *argument)
+{
+  /* USER CODE BEGIN dashHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END dashHandler */
+}
+
+/* USER CODE BEGIN Header_spaceHandler */
+/**
+* @brief Function implementing the spaceTask thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_spaceHandler */
+void spaceHandler(void *argument)
+{
+  /* USER CODE BEGIN spaceHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END spaceHandler */
+}
+
+/* USER CODE BEGIN Header_displayChoiceHandler */
+/**
+* @brief Function implementing the displayChoice thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displayChoiceHandler */
+void displayChoiceHandler(void *argument)
+{
+  /* USER CODE BEGIN displayChoiceHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END displayChoiceHandler */
+}
+
+/* USER CODE BEGIN Header_checkChoiceHandler */
+/**
+* @brief Function implementing the checkChoice thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_checkChoiceHandler */
+void checkChoiceHandler(void *argument)
+{
+  /* USER CODE BEGIN checkChoiceHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END checkChoiceHandler */
+}
+
+/* USER CODE BEGIN Header_displayIncorrectHandler */
+/**
+* @brief Function implementing the displayInc thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displayIncorrectHandler */
+void displayIncorrectHandler(void *argument)
+{
+  /* USER CODE BEGIN displayIncorrectHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END displayIncorrectHandler */
+}
+
+/* USER CODE BEGIN Header_displayCorrectHandler */
+/**
+* @brief Function implementing the displayCorr thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displayCorrectHandler */
+void displayCorrectHandler(void *argument)
+{
+  /* USER CODE BEGIN displayCorrectHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END displayCorrectHandler */
 }
 
 /**

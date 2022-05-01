@@ -84,16 +84,10 @@ void Error_Handler(void);
 #define PSRAM_A4_GPIO_Port GPIOF
 #define PSRAM_A5_Pin GPIO_PIN_5
 #define PSRAM_A5_GPIO_Port GPIOF
-#define ARD_D0_Pin GPIO_PIN_6
-#define ARD_D0_GPIO_Port GPIOF
-#define ARD_D1_Pin GPIO_PIN_7
-#define ARD_D1_GPIO_Port GPIOF
 #define QSPI_BK1_IO0_Pin GPIO_PIN_8
 #define QSPI_BK1_IO0_GPIO_Port GPIOF
 #define QSPI_BK1_IO1_Pin GPIO_PIN_9
 #define QSPI_BK1_IO1_GPIO_Port GPIOF
-#define ARD_D3_Pin GPIO_PIN_10
-#define ARD_D3_GPIO_Port GPIOF
 #define STLK_MCO_Pin GPIO_PIN_0
 #define STLK_MCO_GPIO_Port GPIOH
 #define WIFI_RST_Pin GPIO_PIN_1
@@ -200,8 +194,6 @@ void Error_Handler(void);
 #define PSRAM_A15_GPIO_Port GPIOG
 #define QSPI_BK1_NCS_Pin GPIO_PIN_6
 #define QSPI_BK1_NCS_GPIO_Port GPIOG
-#define USB_OTG_FS_OVRCR_Pin GPIO_PIN_7
-#define USB_OTG_FS_OVRCR_GPIO_Port GPIOG
 #define USB_OTG_FS_PWR_EN_Pin GPIO_PIN_8
 #define USB_OTG_FS_PWR_EN_GPIO_Port GPIOG
 #define I2CFMP1_SCL_Pin GPIO_PIN_6
@@ -258,8 +250,6 @@ void Error_Handler(void);
 #define WIFI_SPI_CSN_GPIO_Port GPIOG
 #define WIFI_DRDY_Pin GPIO_PIN_12
 #define WIFI_DRDY_GPIO_Port GPIOG
-#define ARD_D2_Pin GPIO_PIN_13
-#define ARD_D2_GPIO_Port GPIOG
 #define VCP_TX_Pin GPIO_PIN_14
 #define VCP_TX_GPIO_Port GPIOG
 #define CODEC_INT_Pin GPIO_PIN_15
@@ -270,8 +260,6 @@ void Error_Handler(void);
 #define ARD_D12_GPIO_Port GPIOB
 #define ARD_D11_Pin GPIO_PIN_5
 #define ARD_D11_GPIO_Port GPIOB
-#define ARD_D4_Pin GPIO_PIN_6
-#define ARD_D4_GPIO_Port GPIOB
 #define DFSDM2_DATIN7_Pin GPIO_PIN_7
 #define DFSDM2_DATIN7_GPIO_Port GPIOB
 #define ARD_D9_Pin GPIO_PIN_8
