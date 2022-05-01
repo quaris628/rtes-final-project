@@ -120,6 +120,13 @@ const osThreadAttr_t displayCorr_attributes = {
   .priority = (osPriority_t) osPriorityBelowNormal,
   .stack_size = 128 * 4
 };
+/* Definitions for displayMain */
+osThreadId_t displayMainHandle;
+const osThreadAttr_t displayMain_attributes = {
+  .name = "displayMain",
+  .priority = (osPriority_t) osPriorityBelowNormal,
+  .stack_size = 128 * 4
+};
 /* Definitions for displayMutex */
 osMutexId_t displayMutexHandle;
 const osMutexAttr_t displayMutex_attributes = {
@@ -156,6 +163,7 @@ void displayChoiceHandler(void *argument);
 void checkChoiceHandler(void *argument);
 void displayIncorrectHandler(void *argument);
 void displayCorrectHandler(void *argument);
+void displayMainHandler(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -258,6 +266,9 @@ int main(void)
 
   /* creation of displayCorr */
   displayCorrHandle = osThreadNew(displayCorrectHandler, NULL, &displayCorr_attributes);
+
+  /* creation of displayMain */
+  displayMainHandle = osThreadNew(displayMainHandler, NULL, &displayMain_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1112,6 +1123,24 @@ void displayCorrectHandler(void *argument)
     osDelay(1);
   }
   /* USER CODE END displayCorrectHandler */
+}
+
+/* USER CODE BEGIN Header_displayMainHandler */
+/**
+* @brief Function implementing the displayMain thread.
+* @param argument: Not used
+* @retval None
+*/
+/* USER CODE END Header_displayMainHandler */
+void displayMainHandler(void *argument)
+{
+  /* USER CODE BEGIN displayMainHandler */
+  /* Infinite loop */
+  for(;;)
+  {
+    osDelay(1);
+  }
+  /* USER CODE END displayMainHandler */
 }
 
 /**
