@@ -1,5 +1,6 @@
 #Generated from ioc
-/Drivers
+/Drivers/CMSIS
+/Drivers/STM32F4xx_HAL_Driver
 /USB_HOST
 /build
 /Middlewares
@@ -20,3 +21,6 @@
 
 #Misc
 *.mxproject
+
+
+
