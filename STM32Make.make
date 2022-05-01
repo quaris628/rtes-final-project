@@ -164,6 +164,35 @@ AS_INCLUDES = \
 # C includes
 C_INCLUDES =  \
 -ICore/Inc \
+-IDrivers/BSP/Components/Common \
+-IDrivers/BSP/Components/ampire480272 \
+-IDrivers/BSP/Components/ampire640480 \
+-IDrivers/BSP/Components/cs43l22 \
+-IDrivers/BSP/Components/exc7200 \
+-IDrivers/BSP/Components/ft6x06 \
+-IDrivers/BSP/Components/ili9325 \
+-IDrivers/BSP/Components/ili9341 \
+-IDrivers/BSP/Components/l3gd20 \
+-IDrivers/BSP/Components/lis302dl \
+-IDrivers/BSP/Components/lis3dsh \
+-IDrivers/BSP/Components/ls016b8uy \
+-IDrivers/BSP/Components/lsm303dlhc \
+-IDrivers/BSP/Components/mfxstm32l152 \
+-IDrivers/BSP/Components/n25q128a \
+-IDrivers/BSP/Components/n25q256a \
+-IDrivers/BSP/Components/n25q512a \
+-IDrivers/BSP/Components/otm8009a \
+-IDrivers/BSP/Components/ov2640 \
+-IDrivers/BSP/Components/ov5640 \
+-IDrivers/BSP/Components/s25fl512s \
+-IDrivers/BSP/Components/s5k5cag \
+-IDrivers/BSP/Components/st7735 \
+-IDrivers/BSP/Components/st7789h2 \
+-IDrivers/BSP/Components/stmpe1600 \
+-IDrivers/BSP/Components/stmpe811 \
+-IDrivers/BSP/Components/ts3510 \
+-IDrivers/BSP/Components/wm8994 \
+-IDrivers/BSP/STM32F413H-Discovery \
 -IDrivers/CMSIS/Device/ST/STM32F4xx/Include \
 -IDrivers/CMSIS/Include \
 -IDrivers/STM32F4xx_HAL_Driver/Inc \
