@@ -25,7 +25,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stm32f413h_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -65,68 +65,48 @@ UART_HandleTypeDef huart6;
 SRAM_HandleTypeDef hsram1;
 SRAM_HandleTypeDef hsram2;
 
-/* Definitions for generateProblem */
-osThreadId_t generateProblemHandle;
-const osThreadAttr_t generateProblem_attributes = {
-  .name = "generateProblem",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+/* Definitions for gameTask */
+osThreadId_t gameTaskHandle;
+const osThreadAttr_t gameTask_attributes = {
+  .name = "gameTask",
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
-/* Definitions for dotTask */
-osThreadId_t dotTaskHandle;
-const osThreadAttr_t dotTask_attributes = {
-  .name = "dotTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+/* Definitions for displayTask */
+osThreadId_t displayTaskHandle;
+const osThreadAttr_t displayTask_attributes = {
+  .name = "displayTask",
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
-/* Definitions for dashTask */
-osThreadId_t dashTaskHandle;
-const osThreadAttr_t dashTask_attributes = {
-  .name = "dashTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+/* Definitions for buttonTask */
+osThreadId_t buttonTaskHandle;
+const osThreadAttr_t buttonTask_attributes = {
+  .name = "buttonTask",
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
-/* Definitions for spaceTask */
-osThreadId_t spaceTaskHandle;
-const osThreadAttr_t spaceTask_attributes = {
-  .name = "spaceTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+/* Definitions for ledTask */
+osThreadId_t ledTaskHandle;
+const osThreadAttr_t ledTask_attributes = {
+  .name = "ledTask",
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
-/* Definitions for displayChoice */
-osThreadId_t displayChoiceHandle;
-const osThreadAttr_t displayChoice_attributes = {
-  .name = "displayChoice",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 128 * 4
+/* Definitions for problemTimeout */
+osTimerId_t problemTimeoutHandle;
+const osTimerAttr_t problemTimeout_attributes = {
+  .name = "problemTimeout"
 };
-/* Definitions for checkChoice */
-osThreadId_t checkChoiceHandle;
-const osThreadAttr_t checkChoice_attributes = {
-  .name = "checkChoice",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 128 * 4
+/* Definitions for dotTimer */
+osTimerId_t dotTimerHandle;
+const osTimerAttr_t dotTimer_attributes = {
+  .name = "dotTimer"
 };
-/* Definitions for displayInc */
-osThreadId_t displayIncHandle;
-const osThreadAttr_t displayInc_attributes = {
-  .name = "displayInc",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 128 * 4
-};
-/* Definitions for displayCorr */
-osThreadId_t displayCorrHandle;
-const osThreadAttr_t displayCorr_attributes = {
-  .name = "displayCorr",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 128 * 4
-};
-/* Definitions for displayMain */
-osThreadId_t displayMainHandle;
-const osThreadAttr_t displayMain_attributes = {
-  .name = "displayMain",
-  .priority = (osPriority_t) osPriorityBelowNormal,
-  .stack_size = 128 * 4
+/* Definitions for dashTimer */
+osTimerId_t dashTimerHandle;
+const osTimerAttr_t dashTimer_attributes = {
+  .name = "dashTimer"
 };
 /* Definitions for displayMutex */
 osMutexId_t displayMutexHandle;
@@ -137,6 +117,11 @@ const osMutexAttr_t displayMutex_attributes = {
 osMutexId_t ledMutexHandle;
 const osMutexAttr_t ledMutex_attributes = {
   .name = "ledMutex"
+};
+/* Definitions for buttonMutex */
+osMutexId_t buttonMutexHandle;
+const osMutexAttr_t buttonMutex_attributes = {
+  .name = "buttonMutex"
 };
 /* USER CODE BEGIN PV */
 
@@ -156,15 +141,13 @@ static void MX_QUADSPI_Init(void);
 static void MX_SDIO_SD_Init(void);
 static void MX_UART10_Init(void);
 static void MX_USART6_UART_Init(void);
-void generateProblemHandler(void *argument);
-void dotHandler(void *argument);
-void dashHandler(void *argument);
-void spaceHandler(void *argument);
-void displayChoiceHandler(void *argument);
-void checkChoiceHandler(void *argument);
-void displayIncorrectHandler(void *argument);
-void displayCorrectHandler(void *argument);
-void displayMainHandler(void *argument);
+void gameHandler(void *argument);
+void displayHandler(void *argument);
+void buttonHandler(void *argument);
+void ledHandler(void *argument);
+void problemTimeoutCallback(void *argument);
+void dotCallback(void *argument);
+void dashCallback(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -227,6 +210,9 @@ int main(void)
   /* creation of ledMutex */
   ledMutexHandle = osMutexNew(&ledMutex_attributes);
 
+  /* creation of buttonMutex */
+  buttonMutexHandle = osMutexNew(&buttonMutex_attributes);
+
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
@@ -234,6 +220,16 @@ int main(void)
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
   /* USER CODE END RTOS_SEMAPHORES */
+
+  /* Create the timer(s) */
+  /* creation of problemTimeout */
+  problemTimeoutHandle = osTimerNew(problemTimeoutCallback, osTimerOnce, NULL, &problemTimeout_attributes);
+
+  /* creation of dotTimer */
+  dotTimerHandle = osTimerNew(dotCallback, osTimerOnce, NULL, &dotTimer_attributes);
+
+  /* creation of dashTimer */
+  dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, NULL, &dashTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -244,32 +240,17 @@ int main(void)
   /* USER CODE END RTOS_QUEUES */
 
   /* Create the thread(s) */
-  /* creation of generateProblem */
-  generateProblemHandle = osThreadNew(generateProblemHandler, NULL, &generateProblem_attributes);
+  /* creation of gameTask */
+  gameTaskHandle = osThreadNew(gameHandler, NULL, &gameTask_attributes);
 
-  /* creation of dotTask */
-  dotTaskHandle = osThreadNew(dotHandler, NULL, &dotTask_attributes);
+  /* creation of displayTask */
+  displayTaskHandle = osThreadNew(displayHandler, NULL, &displayTask_attributes);
 
-  /* creation of dashTask */
-  dashTaskHandle = osThreadNew(dashHandler, NULL, &dashTask_attributes);
+  /* creation of buttonTask */
+  buttonTaskHandle = osThreadNew(buttonHandler, NULL, &buttonTask_attributes);
 
-  /* creation of spaceTask */
-  spaceTaskHandle = osThreadNew(spaceHandler, NULL, &spaceTask_attributes);
-
-  /* creation of displayChoice */
-  displayChoiceHandle = osThreadNew(displayChoiceHandler, NULL, &displayChoice_attributes);
-
-  /* creation of checkChoice */
-  checkChoiceHandle = osThreadNew(checkChoiceHandler, NULL, &checkChoice_attributes);
-
-  /* creation of displayInc */
-  displayIncHandle = osThreadNew(displayIncorrectHandler, NULL, &displayInc_attributes);
-
-  /* creation of displayCorr */
-  displayCorrHandle = osThreadNew(displayCorrectHandler, NULL, &displayCorr_attributes);
-
-  /* creation of displayMain */
-  displayMainHandle = osThreadNew(displayMainHandler, NULL, &displayMain_attributes);
+  /* creation of ledTask */
+  ledTaskHandle = osThreadNew(ledHandler, NULL, &ledTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -980,14 +961,14 @@ static void MX_FSMC_Init(void)
 
 /* USER CODE END 4 */
 
-/* USER CODE BEGIN Header_generateProblemHandler */
+/* USER CODE BEGIN Header_gameHandler */
 /**
-  * @brief  Function implementing the generateProblem thread.
+  * @brief  Function implementing the gameTask thread.
   * @param  argument: Not used
   * @retval None
   */
-/* USER CODE END Header_generateProblemHandler */
-void generateProblemHandler(void *argument)
+/* USER CODE END Header_gameHandler */
+void gameHandler(void *argument)
 {
   /* init code for USB_HOST */
   MX_USB_HOST_Init();
@@ -1000,148 +981,82 @@ void generateProblemHandler(void *argument)
   /* USER CODE END 5 */
 }
 
-/* USER CODE BEGIN Header_dotHandler */
+/* USER CODE BEGIN Header_displayHandler */
 /**
-* @brief Function implementing the dotTask thread.
+* @brief Function implementing the displayTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_dotHandler */
-void dotHandler(void *argument)
+/* USER CODE END Header_displayHandler */
+void displayHandler(void *argument)
 {
-  /* USER CODE BEGIN dotHandler */
+  /* USER CODE BEGIN displayHandler */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END dotHandler */
+  /* USER CODE END displayHandler */
 }
 
-/* USER CODE BEGIN Header_dashHandler */
+/* USER CODE BEGIN Header_buttonHandler */
 /**
-* @brief Function implementing the dashTask thread.
+* @brief Function implementing the buttonTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_dashHandler */
-void dashHandler(void *argument)
+/* USER CODE END Header_buttonHandler */
+void buttonHandler(void *argument)
 {
-  /* USER CODE BEGIN dashHandler */
+  /* USER CODE BEGIN buttonHandler */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END dashHandler */
+  /* USER CODE END buttonHandler */
 }
 
-/* USER CODE BEGIN Header_spaceHandler */
+/* USER CODE BEGIN Header_ledHandler */
 /**
-* @brief Function implementing the spaceTask thread.
+* @brief Function implementing the ledTask thread.
 * @param argument: Not used
 * @retval None
 */
-/* USER CODE END Header_spaceHandler */
-void spaceHandler(void *argument)
+/* USER CODE END Header_ledHandler */
+void ledHandler(void *argument)
 {
-  /* USER CODE BEGIN spaceHandler */
+  /* USER CODE BEGIN ledHandler */
   /* Infinite loop */
   for(;;)
   {
     osDelay(1);
   }
-  /* USER CODE END spaceHandler */
+  /* USER CODE END ledHandler */
 }
 
-/* USER CODE BEGIN Header_displayChoiceHandler */
-/**
-* @brief Function implementing the displayChoice thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_displayChoiceHandler */
-void displayChoiceHandler(void *argument)
+/* problemTimeoutCallback function */
+void problemTimeoutCallback(void *argument)
 {
-  /* USER CODE BEGIN displayChoiceHandler */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END displayChoiceHandler */
+  /* USER CODE BEGIN problemTimeoutCallback */
+
+  /* USER CODE END problemTimeoutCallback */
 }
 
-/* USER CODE BEGIN Header_checkChoiceHandler */
-/**
-* @brief Function implementing the checkChoice thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_checkChoiceHandler */
-void checkChoiceHandler(void *argument)
+/* dotCallback function */
+void dotCallback(void *argument)
 {
-  /* USER CODE BEGIN checkChoiceHandler */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END checkChoiceHandler */
+  /* USER CODE BEGIN dotCallback */
+
+  /* USER CODE END dotCallback */
 }
 
-/* USER CODE BEGIN Header_displayIncorrectHandler */
-/**
-* @brief Function implementing the displayInc thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_displayIncorrectHandler */
-void displayIncorrectHandler(void *argument)
+/* dashCallback function */
+void dashCallback(void *argument)
 {
-  /* USER CODE BEGIN displayIncorrectHandler */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END displayIncorrectHandler */
-}
+  /* USER CODE BEGIN dashCallback */
 
-/* USER CODE BEGIN Header_displayCorrectHandler */
-/**
-* @brief Function implementing the displayCorr thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_displayCorrectHandler */
-void displayCorrectHandler(void *argument)
-{
-  /* USER CODE BEGIN displayCorrectHandler */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END displayCorrectHandler */
-}
-
-/* USER CODE BEGIN Header_displayMainHandler */
-/**
-* @brief Function implementing the displayMain thread.
-* @param argument: Not used
-* @retval None
-*/
-/* USER CODE END Header_displayMainHandler */
-void displayMainHandler(void *argument)
-{
-  /* USER CODE BEGIN displayMainHandler */
-  /* Infinite loop */
-  for(;;)
-  {
-    osDelay(1);
-  }
-  /* USER CODE END displayMainHandler */
+  /* USER CODE END dashCallback */
 }
 
 /**
