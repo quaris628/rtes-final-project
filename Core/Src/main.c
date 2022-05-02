@@ -21,7 +21,6 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usb_host.h"
-#include "stm32f413h_discovery_lcd.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
@@ -123,7 +122,66 @@ osMutexId_t buttonMutexHandle;
 const osMutexAttr_t buttonMutex_attributes = {
   .name = "buttonMutex"
 };
+/* Definitions for displaySemEMPTY */
+osSemaphoreId_t displaySemEMPTYHandle;
+const osSemaphoreAttr_t displaySemEMPTY_attributes = {
+  .name = "displaySemEMPTY"
+};
+/* Definitions for displaySemFULL */
+osSemaphoreId_t displaySemFULLHandle;
+const osSemaphoreAttr_t displaySemFULL_attributes = {
+  .name = "displaySemFULL"
+};
+/* Definitions for buttonSemFULL */
+osSemaphoreId_t buttonSemFULLHandle;
+const osSemaphoreAttr_t buttonSemFULL_attributes = {
+  .name = "buttonSemFULL"
+};
+/* Definitions for buttonSemEMPTY */
+osSemaphoreId_t buttonSemEMPTYHandle;
+const osSemaphoreAttr_t buttonSemEMPTY_attributes = {
+  .name = "buttonSemEMPTY"
+};
+/* Definitions for ledSemFULL */
+osSemaphoreId_t ledSemFULLHandle;
+const osSemaphoreAttr_t ledSemFULL_attributes = {
+  .name = "ledSemFULL"
+};
+/* Definitions for ledSEMEmpty */
+osSemaphoreId_t ledSEMEmptyHandle;
+const osSemaphoreAttr_t ledSEMEmpty_attributes = {
+  .name = "ledSEMEmpty"
+};
 /* USER CODE BEGIN PV */
+MORSE A[] = { DOT, DASH };
+MORSE B[] = { DASH, DOT, DOT, DOT };
+MORSE C[] = { DASH, DOT, DASH, DOT }; 
+MORSE D[] = { DASH, DOT, DOT };
+MORSE E[] = { DOT };
+MORSE F[] = { DOT, DOT, DASH, DOT };
+MORSE G[] = { DASH, DASH, DOT };
+MORSE H[] = { DOT, DOT, DOT, DOT };
+MORSE I[] = { DOT, DOT };
+MORSE J[] = { DOT, DASH, DASH, DASH };
+MORSE K[] = { DASH, DOT, DASH };
+MORSE L[] = { DOT, DASH, DOT, DOT };
+MORSE M[] = { DASH, DASH };
+MORSE N[] = { DASH, DOT };
+MORSE O[] = { DASH, DASH, DASH };
+MORSE P[] = { DOT, DASH, DASH, DOT };
+MORSE Q[] = { DASH, DASH, DOT, DASH };
+MORSE R[] = { DOT, DASH, DOT };
+MORSE S[] = { DOT, DOT, DOT };
+MORSE T[] = { DASH };
+MORSE U[] = { DOT, DOT, DASH };
+MORSE V[] = { DOT, DOT, DOT, DASH };
+MORSE W[] = { DOT, DASH, DASH };
+MORSE X[] = { DASH, DOT, DOT, DASH };
+MORSE Y[] = { DASH, DOT, DASH, DASH };
+MORSE Z[] = { DASH, DASH, DOT, DOT };
+
+MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
+GAME_STATES gameState = MAIN;
 
 /* USER CODE END PV */
 
@@ -150,12 +208,84 @@ void dotCallback(void *argument);
 void dashCallback(void *argument);
 
 /* USER CODE BEGIN PFP */
-
+void TM_RNG_Init(void);
+void TM_RNG_DeInit(void);
+uint32_t TM_RNG_Get(void);
+void gameMain(void);
+void gameProblem(void);
+void gameEnd(void);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void TM_RNG_Init(void)
+{
+  __HAL_RCC_RNG_CLK_ENABLE();
+  RNG->CR |= RNG_CR_RNGEN;
+}
 
+void TM_RNG_DeInit(void)
+{
+  RNG->CR &= ~RNG_CR_RNGEN;
+  __HAL_RCC_RNG_CLK_DISABLE();
+}
+
+uint32_t TM_RNG_Get(void)
+{
+  while (!(RNG->SR & (RNG_SR_DRDY)));
+  return RNG->DR;
+}
+
+void gameMain() {
+  //Lock button press and display main menu
+  osMutexAcquire(buttonMutexHandle, osWaitForever);
+  osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
+  //TODO: Add main menu text to display buffer
+  osSemaphoreRelease(displaySemFULLHandle);
+
+  //Get next button press
+  osSemaphoreRelease(buttonSemFULLHandle); 
+  osMutexRelease(buttonMutexHandle);
+
+  //Process button press
+  osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
+  //TODO: Handle button press
+  gameState = PROBLEM;
+  osSemaphoreRelease(buttonSemEMPTYHandle);
+}
+
+void gameProblem() {
+  //Lock button press and display problem
+  osMutexAcquire(buttonMutexHandle, osWaitForever);
+  osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
+  int letterNum = TM_RNG_GET() % 26;
+  
+  //TODO: Add main menu text to display buffer
+  osSemaphoreRelease(displaySemFULLHandle);
+
+  for (int i = 0; i < sizeof(letters[letterNum]) / sizeof(MORSE); i++) {
+    osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
+    //ledBuffer = letters[letterNum][i]; TODO: Change to buffer
+    osSemaphoreRelease(ledSemFULLHandle);
+  }
+
+  //Get next button press
+  osSemaphoreRelease(buttonSemFULLHandle); 
+  osMutexRelease(buttonMutexHandle);
+
+  //Process button press
+  osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
+  //TODO: Handle button press
+  gameState = END;
+  osSemaphoreRelease(buttonSemEMPTYHandle);
+}
+
+void gameEnd() {
+  for (;;)
+  {
+    
+  }
+}
 /* USER CODE END 0 */
 
 /**
@@ -198,7 +328,7 @@ int main(void)
   MX_UART10_Init();
   MX_USART6_UART_Init();
   /* USER CODE BEGIN 2 */
-
+  TM_RNG_Init();
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -216,6 +346,25 @@ int main(void)
   /* USER CODE BEGIN RTOS_MUTEX */
   /* add mutexes, ... */
   /* USER CODE END RTOS_MUTEX */
+
+  /* Create the semaphores(s) */
+  /* creation of displaySemEMPTY */
+  displaySemEMPTYHandle = osSemaphoreNew(1, 1, &displaySemEMPTY_attributes);
+
+  /* creation of displaySemFULL */
+  displaySemFULLHandle = osSemaphoreNew(1, 1, &displaySemFULL_attributes);
+
+  /* creation of buttonSemFULL */
+  buttonSemFULLHandle = osSemaphoreNew(1, 1, &buttonSemFULL_attributes);
+
+  /* creation of buttonSemEMPTY */
+  buttonSemEMPTYHandle = osSemaphoreNew(1, 1, &buttonSemEMPTY_attributes);
+
+  /* creation of ledSemFULL */
+  ledSemFULLHandle = osSemaphoreNew(1, 1, &ledSemFULL_attributes);
+
+  /* creation of ledSEMEmpty */
+  ledSEMEmptyHandle = osSemaphoreNew(1, 1, &ledSEMEmpty_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
   /* add semaphores, ... */
@@ -976,7 +1125,18 @@ void gameHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    switch (gameState)
+    {
+    case MAIN:
+      gameEnd();
+      break;
+    case PROBLEM:
+      gameProblem();
+      break;
+    case END:
+      gameEnd();
+      break;
+    }
   }
   /* USER CODE END 5 */
 }

@@ -37,7 +37,18 @@ extern "C" {
 
 /* Exported types ------------------------------------------------------------*/
 /* USER CODE BEGIN ET */
+typedef enum
+{
+  MAIN,
+  PROBLEM,
+  END
+} GAME_STATES;
 
+typedef enum
+{
+  DOT,
+  DASH
+} MORSE;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/
