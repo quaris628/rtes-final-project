@@ -21,11 +21,10 @@
 #include "main.h"
 #include "cmsis_os.h"
 #include "usb_host.h"
-#include "stm32f413h_discovery_lcd.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stm32f413h_discovery_lcd.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -69,7 +68,7 @@ SRAM_HandleTypeDef hsram2;
 osThreadId_t gameTaskHandle;
 const osThreadAttr_t gameTask_attributes = {
   .name = "gameTask",
-  .priority = (osPriority_t) osPriorityBelowNormal,
+  .priority = (osPriority_t) osPriorityLow,
   .stack_size = 128 * 4
 };
 /* Definitions for displayTask */
@@ -107,11 +106,6 @@ const osTimerAttr_t dotTimer_attributes = {
 osTimerId_t dashTimerHandle;
 const osTimerAttr_t dashTimer_attributes = {
   .name = "dashTimer"
-};
-/* Definitions for spaceTimer */
-osTimerId_t spaceTimerHandle;
-const osTimerAttr_t spaceTimer_attributes = {
-  .name = "spaceTimer"
 };
 /* Definitions for displayMutex */
 osMutexId_t displayMutexHandle;
@@ -153,7 +147,6 @@ void ledHandler(void *argument);
 void problemTimeoutCallback(void *argument);
 void dotCallback(void *argument);
 void dashCallback(void *argument);
-void spaceCallback(void *argument);
 
 /* USER CODE BEGIN PFP */
 
@@ -236,9 +229,6 @@ int main(void)
 
   /* creation of dashTimer */
   dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, NULL, &dashTimer_attributes);
-
-  /* creation of spaceTimer */
-  spaceTimerHandle = osTimerNew(spaceCallback, osTimerOnce, NULL, &spaceTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -1066,14 +1056,6 @@ void dashCallback(void *argument)
   /* USER CODE BEGIN dashCallback */
 
   /* USER CODE END dashCallback */
-}
-
-/* spaceCallback function */
-void spaceCallback(void *argument)
-{
-  /* USER CODE BEGIN spaceCallback */
-
-  /* USER CODE END spaceCallback */
 }
 
 /**
