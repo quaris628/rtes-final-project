@@ -1315,7 +1315,7 @@ void buttonHandler(void *argument)
       int button3Count = 0;
       int button4Count = 0;
 
-      for (int i = 0; i < 5; i++) {
+      for (int i = 0; i < 10; i++) {
         if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10))
         {
           button1Count += 1;
@@ -1335,19 +1335,19 @@ void buttonHandler(void *argument)
         osDelay(10);
       }
 
-      if(button1Count > 2) {
+      if(button1Count > 5) {
         buttonBuffer = RED;
         buttonPressed = true;
       }
-      else if(button2Count > 2) {
+      else if(button2Count > 5) {
         buttonBuffer = GREEN;
         buttonPressed = true;
       }
-      else if(button3Count > 2) {
+      else if(button3Count > 5) {
         buttonBuffer = BLUE;
         buttonPressed = true;
       }
-      else if(button4Count > 2) {
+      else if(button4Count > 5) {
         buttonBuffer = YELLOW;
         buttonPressed = true;
       }
