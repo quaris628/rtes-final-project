@@ -1,3 +1,6 @@
+# had some full filepath info that seemed auto-generated. (manually added by Nathan)
+STM32Make.make
+
 #Generated from ioc
 /Drivers/CMSIS
 /Drivers/STM32F4xx_HAL_Driver
