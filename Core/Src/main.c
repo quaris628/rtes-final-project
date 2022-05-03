@@ -195,7 +195,7 @@ int correctChoice = -1;
 // written to only by button thread ?
 int chosenChoice = -1;
 
-uint16_t BUTTON_COLORS[] = {LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN, LCD_COLOR_BLUE};
+uint16_t BUTTON_COLORS[] = {LCD_COLOR_BLUE, LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN};
 
 /* USER CODE END PV */
 
@@ -302,12 +302,11 @@ void gameProblem() {
   //Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
-  if(status == osErrorTimeout)
-  {
-    Error_Handler();
-  }
-  else{
-    //Process button press //TODO: Handle button press
+   if(status == osErrorTimeout) {
+    chosenChoice = -1;
+  } else {
+    // Handle button press
+    chosenChoice = (int)buttonBuffer;
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
   gameState = END;
@@ -315,10 +314,22 @@ void gameProblem() {
 }
 
 void gameEnd() {
-  for (;;)
-  {
-    osDelay(2000);
+  if (chosenChoice == -1) {
+    gameState = MAIN;
+  } else if (chosenChoice != correctChoice) {
+    // update lcd, need to wait for lcd handler to
+    //     complete before changing gameState back to PROBLEM
+    osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
+    osSemaphoreRelease(displaySemFULLHandle);
+    // go to PROBLEM state b/c incorrect
+    gameState = PROBLEM;
+  } else {
+    // update lcd, no need to wait for it to complete
+    osSemaphoreAcquire(displaySemEMPTYHandle, 0);
+    osSemaphoreRelease(displaySemFULLHandle);
   }
+  // TODO transition to MAIN or PROBLEM based on play-again prompt
+  
 }
 /* USER CODE END 0 */
 
