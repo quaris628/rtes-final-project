@@ -310,26 +310,31 @@ void gameProblem() {
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
   gameState = END;
-  
 }
 
 void gameEnd() {
-  if (chosenChoice == -1) {
-    gameState = MAIN;
-  } else if (chosenChoice != correctChoice) {
-    // update lcd, need to wait for lcd handler to
-    //     complete before changing gameState back to PROBLEM
-    osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-    osSemaphoreRelease(displaySemFULLHandle);
-    // go to PROBLEM state b/c incorrect
-    //gameState = PROBLEM;
-  } else {
-    // update lcd, no need to wait for it to complete
-    osSemaphoreAcquire(displaySemEMPTYHandle, 0);
-    osSemaphoreRelease(displaySemFULLHandle);
-  }
-  // TODO transition to MAIN or PROBLEM based on play-again prompt
+  // display "would you like to play again?"
+  osSemaphoreAcquire(displaySemEMPTYHandle, 0);
+  osSemaphoreRelease(displaySemFULLHandle);
   
+  // get button press
+  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
+
+  if(status == osErrorTimeout) {
+    // if timed out, don't play again, go to main menu
+    gameState = MAIN;
+  } else {
+    // depending on which button was pressed
+    if((int)buttonBuffer == 1) {
+      // if said yes, play again
+      // TODO change to generate problem state
+      gameState = PROBLEM;
+    } else {
+      // if said no, don't play again
+      gameState = MAIN;
+    }
+    osSemaphoreRelease(buttonSemEMPTYHandle);
+  }
 }
 /* USER CODE END 0 */
 
@@ -1238,7 +1243,6 @@ void displayHandler(void *argument)
       BSP_LCD_Clear(LCD_COLOR_WHITE);
 
       // Display user button choices
-      
       for (int i = 0; i < 4; i++) {
         int y = PAD + (SQUARE_SIZE + PAD) * i;
         // display square of button color
