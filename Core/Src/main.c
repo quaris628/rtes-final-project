@@ -285,7 +285,7 @@ void gameProblem() {
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
   //TODO: Handle button press
   gameState = END;
-  osSemaphoreRelease(buttonSemEMPTYHandle);
+    osSemaphoreRelease(buttonSemEMPTYHandle);
 }
 
 void gameEnd() {
@@ -377,9 +377,9 @@ int main(void)
   ledSEMEmptyHandle = osSemaphoreNew(1, 1, &ledSEMEmpty_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  osSemaphoreRelease(displaySemFULLHandle);
-  osSemaphoreRelease(ledSemFULLHandle);
-  osSemaphoreRelease(buttonSemEMPTYHandle);
+  osMutexAcquire(ledSemFULLHandle, 5);
+  osMutexAcquire(buttonSemFULLHandle, 5);
+  osMutexAcquire(displaySemFULLHandle, 5);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* Create the timer(s) */
