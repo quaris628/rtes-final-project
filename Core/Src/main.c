@@ -281,11 +281,12 @@ void gameProblem() {
   {
     Error_Handler();
   }
-  //Process button press
-  osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
-  //TODO: Handle button press
-  gameState = END;
+  else{
+    //Process button press //TODO: Handle button press
     osSemaphoreRelease(buttonSemEMPTYHandle);
+  }
+  gameState = END;
+  
 }
 
 void gameEnd() {
