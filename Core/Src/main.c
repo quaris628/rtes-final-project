@@ -1247,8 +1247,8 @@ void displayHandler(void *argument)
         BSP_LCD_SetTextColor(LCD_COLOR_RED);
         u_int8_t * incorrectChar = "X";
         BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, incorrectChar, LEFT_MODE);
-      }
-
+      } 
+    }
     osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
   }
