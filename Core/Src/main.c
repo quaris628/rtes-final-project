@@ -182,6 +182,7 @@ MORSE Y[] = { DASH, DOT, DASH, DASH };
 MORSE Z[] = { DASH, DASH, DOT, DOT };
 
 MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
+MORSE ledBuffer = DOT;
 
 GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
 
@@ -1361,7 +1362,17 @@ void ledHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(10000);
+    osSemaphoreAcquire(ledSemFULLHandle, osWaitForever);
+    if (ledBuffer == DOT)
+    {
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, SET);
+      osTimerStart(dotTimerHandle, 500);
+    }
+    else if (ledBuffer == DASH)
+    {
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, SET);
+      osTimerStart(dashTimerHandle, 1000);
+    }
   }
   /* USER CODE END ledHandler */
 }
@@ -1378,7 +1389,9 @@ void problemTimeoutCallback(void *argument)
 void dotCallback(void *argument)
 {
   /* USER CODE BEGIN dotCallback */
-  osDelay(2000);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, RESET);
+  osDelay(500);
+  osSemaphoreRelease(ledSEMEmptyHandle);
   /* USER CODE END dotCallback */
 }
 
@@ -1386,7 +1399,9 @@ void dotCallback(void *argument)
 void dashCallback(void *argument)
 {
   /* USER CODE BEGIN dashCallback */
-  osDelay(2000);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, RESET);
+  osDelay(500);
+  osSemaphoreRelease(ledSEMEmptyHandle);
   /* USER CODE END dashCallback */
 }
 
