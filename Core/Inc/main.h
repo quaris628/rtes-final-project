@@ -49,6 +49,15 @@ typedef enum
   DOT,
   DASH
 } MORSE;
+
+typedef enum
+{
+  NONE,
+  BLUE,
+  RED,
+  YELLOW,
+  GREEN
+} BUTTONS;
 /* USER CODE END ET */
 
 /* Exported constants --------------------------------------------------------*/

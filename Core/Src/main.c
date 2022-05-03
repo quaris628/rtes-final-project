@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f413h_discovery_lcd.h"
+#include <stdbool.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -183,6 +184,8 @@ MORSE Z[] = { DASH, DASH, DOT, DOT };
 MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
 GAME_STATES gameState = MAIN;
 
+BUTTONS buttonBuffer = NONE;
+
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -258,7 +261,7 @@ void gameProblem() {
   //Lock button press and display problem
   osMutexAcquire(buttonMutexHandle, osWaitForever);
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-  int letterNum = TM_RNG_GET() % 26;
+  int letterNum = TM_RNG_Get() % 26;
   
   //TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
@@ -1172,7 +1175,59 @@ void buttonHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
+    osMutexAcquire(buttonHandler, osWaitForever);
+    buttonBuffer = NONE;
+    bool buttonPressed = false;
+
+    while(!buttonPressed) {
+
+      int button1Count = 0;
+      int button2Count = 0;
+      int button3Count = 0;
+      int button4Count = 0;
+
+      for (int i = 0; i < 5; i++) {
+        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10))
+        {
+          button1Count += 1;
+        }
+        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_7))
+        {
+          button2Count += 1;
+        }
+        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6))
+        {
+          button3Count += 1;
+        }
+        if(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_13))
+        {
+          button4Count += 1;
+        }
+        osDelay(10);
+      }
+
+      if(button1Count > 2) {
+        buttonBuffer = RED;
+        buttonPressed = true;
+      }
+      else if(button2Count > 2) {
+        buttonBuffer = GREEN;
+        buttonPressed = true;
+      }
+      else if(button3Count > 2) {
+        buttonBuffer = BLUE;
+        buttonPressed = true;
+      }
+      else if(button4Count > 2) {
+        buttonBuffer = YELLOW;
+        buttonPressed = true;
+      }
+
+    }
+
+    osMutexRelease(buttonHandler);
+    osSemaphoreRelease(buttonSemFULLHandle);
   }
   /* USER CODE END buttonHandler */
 }
