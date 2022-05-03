@@ -195,7 +195,7 @@ int correctChoice = -1;
 // written to only by button thread ?
 int chosenChoice = -1;
 
-uint16_t BUTTON_COLORS[] = {LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN, LCD_COLOR_BLUE};
+uint16_t BUTTON_COLORS[] = {LCD_COLOR_BLUE, LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN};
 
 /* USER CODE END PV */
 
@@ -286,11 +286,8 @@ void gameMain() {
 }
 
 void gameProblem() {
-  //Lock button press and display problem
-  osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-  //int letterNum = TM_RNG_Get() % 26;
-  
-  //TODO: Add main menu text to display buffer
+  // TODO Lock button press and display problem
+  osSemaphoreAcquire(displaySemEMPTYHandle, 0);
   osSemaphoreRelease(displaySemFULLHandle);
 
   // for (int i = 0; i < sizeof(letters[letterNum]) / sizeof(MORSE); i++) {
@@ -302,23 +299,37 @@ void gameProblem() {
   //Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
-  if(status == osErrorTimeout)
-  {
+  if(status == osErrorTimeout) {
     Error_Handler();
-  }
-  else{
-    //Process button press //TODO: Handle button press
+    chosenChoice = -1;
+    gameState = END;
+  } else {
+    // Handle button press
+    chosenChoice = (int)buttonBuffer;
+    gameState = END;
+    
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
-  gameState = END;
   
 }
 
 void gameEnd() {
-  for (;;)
-  {
-    osDelay(2000);
+  if (chosenChoice == -1) {
+    gameState = MAIN;
+  } else if (chosenChoice != correctChoice) {
+    // update lcd, need to wait for lcd handler to
+    //     complete before changing gameState back to PROBLEM
+    osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
+    osSemaphoreRelease(displaySemFULLHandle);
+    // go to PROBLEM state b/c incorrect
+    gameState = PROBLEM;
+  } else {
+    // update lcd, no need to wait for it to complete
+    osSemaphoreAcquire(displaySemEMPTYHandle, 0);
+    osSemaphoreRelease(displaySemFULLHandle);
   }
+  // TODO transition to MAIN or PROBLEM based on play-again prompt
+  
 }
 /* USER CODE END 0 */
 
