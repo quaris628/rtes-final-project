@@ -25,6 +25,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f413h_discovery_lcd.h"
+#include "stm32f413h_discovery_lcd.c"
 #include <stdbool.h>
 /* USER CODE END Includes */
 
@@ -182,9 +183,17 @@ MORSE Y[] = { DASH, DOT, DASH, DASH };
 MORSE Z[] = { DASH, DASH, DOT, DOT };
 
 MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
-GAME_STATES gameState = MAIN;
+uint8_t* ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
-BUTTONS buttonBuffer = NONE;
+GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
+
+BUTTONS buttonBuffer = NONE; // shared memory
+
+// shared memory, written to only by game thread
+int choices[4];
+int correctChoice = -1;
+
+uint16_t BUTTON_COLORS[] = {LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN, LCD_COLOR_BLUE};
 
 /* USER CODE END PV */
 
@@ -329,6 +338,8 @@ int main(void)
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   TM_RNG_Init();
+  BSP_LCD_Init();
+  //BSP_LCD_Clear(LCD_COLOR_WHITE);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -1176,7 +1187,37 @@ void displayHandler(void *argument)
   for(;;)
   {
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
-    //TODO: Add dispaly funct
+    if (gameState == MAIN) {
+      // TODO Display in Main game state
+    } else if (gameState == PROBLEM) {
+      // Display Problem
+      // TODO test if:
+      //   displays colored boxes on left
+      //   displays text of 4 letters on the right of the boxes
+
+      // Clear LCD
+      BSP_LCD_Clear(LCD_COLOR_WHITE);
+
+      // Display user button choices
+      int SIZE = 15;
+      int PAD = 5;
+      for (int i = 0; i < 4; i++) {
+        int y = PAD + (SIZE + PAD) * i;
+        // display square of button color
+        BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
+        BSP_LCD_FillRect(PAD, y, SIZE, SIZE);
+
+        // unsure if the type is right for this line to work?
+        u_int8_t* letter = ALPHABET[choices[i]];
+        
+        // display text of corresponding letter option
+        BSP_LCD_DisplayStringAt(PAD * 2 + SIZE, y, letter, LEFT_MODE);
+      }
+
+    } else if (gameState == END) {
+      // TODO Display in End game state: Correct/Incorrect answer
+    }
+
     osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
   }
