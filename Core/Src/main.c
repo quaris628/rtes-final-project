@@ -260,13 +260,35 @@ void gameMain() {
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
   //TODO: Handle button press
   gameState = PROBLEM;
+
+  // generate random problem
+  // do this in MAIN and before PROBLEM so gameProblem() can
+  //     be re-used for when the user gets the problem incorrect.
+  choices[0] = TM_RNG_Get() % 26;
+  for (int i = 1; i < 4; i++) {
+    // 2nd choice has 25 possibilities, 3rd choice has 24, etc
+    choices[i] = TM_RNG_Get() % (26 - i);
+    // shift choice up one index if a previous choice is <= to this choice
+    // (to correct for the decreased maximum value that choices[i] can be and
+    //    make all choices distinct)
+    for (int j = 0; j < i; j++) {
+      if (choices[j] <= choices[i]) {
+        choices[i]++;
+      }
+    }
+  }
+  correctChoice = TM_RNG_Get() % 4;
+  chosenChoice = -1;
+  // I believe there's no strict need for a mutex or semaphore on
+  //     the shared memory for choices info?
+
   osSemaphoreRelease(buttonSemEMPTYHandle);
 }
 
 void gameProblem() {
   //Lock button press and display problem
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-  int letterNum = TM_RNG_Get() % 26;
+  //int letterNum = TM_RNG_Get() % 26;
   
   //TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
