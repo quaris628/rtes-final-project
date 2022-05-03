@@ -306,7 +306,7 @@ void gameProblem() {
     chosenChoice = -1;
   } else {
     // Handle button press
-    chosenChoice = (int)buttonBuffer;
+    chosenChoice = (int)buttonBuffer - 1;
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
   gameState = END;
@@ -322,7 +322,7 @@ void gameEnd() {
     osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
     osSemaphoreRelease(displaySemFULLHandle);
     // go to PROBLEM state b/c incorrect
-    gameState = PROBLEM;
+    //gameState = PROBLEM;
   } else {
     // update lcd, no need to wait for it to complete
     osSemaphoreAcquire(displaySemEMPTYHandle, 0);
