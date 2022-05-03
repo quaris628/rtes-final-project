@@ -182,7 +182,6 @@ MORSE Y[] = { DASH, DOT, DASH, DASH };
 MORSE Z[] = { DASH, DASH, DOT, DOT };
 
 MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
-uint8_t* ALPHABET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
 
@@ -364,6 +363,7 @@ int main(void)
   /* USER CODE BEGIN 2 */
   TM_RNG_Init();
   BSP_LCD_Init();
+  BSP_LCD_Clear(LCD_COLOR_WHITE);
   //BSP_LCD_Clear(LCD_COLOR_WHITE);
   /* USER CODE END 2 */
 
@@ -1234,11 +1234,11 @@ void displayHandler(void *argument)
         BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
 
         // unsure if the type is right for this line to work?
-        u_int8_t* letter = ALPHABET[choices[i]];
+        char letter = choices[i] + 'A';
         
         // display text of corresponding letter option
         BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-        BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, y, letter, LEFT_MODE);
+        BSP_LCD_DisplayChar(PAD * 2 + SQUARE_SIZE, y, letter);
       }
 
     } else if (gameState == END) {
