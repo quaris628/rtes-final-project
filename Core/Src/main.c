@@ -411,13 +411,13 @@ int main(void)
 
   /* Create the timer(s) */
   /* creation of problemTimeout */
-  problemTimeoutHandle = osTimerNew(problemTimeoutCallback, osTimerOnce, BUTTON_NONE, &problemTimeout_attributes);
+  problemTimeoutHandle = osTimerNew(problemTimeoutCallback, osTimerOnce, NULL, &problemTimeout_attributes);
 
   /* creation of dotTimer */
-  dotTimerHandle = osTimerNew(dotCallback, osTimerOnce, BUTTON_NONE, &dotTimer_attributes);
+  dotTimerHandle = osTimerNew(dotCallback, osTimerOnce, NULL, &dotTimer_attributes);
 
   /* creation of dashTimer */
-  dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, BUTTON_NONE, &dashTimer_attributes);
+  dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, NULL, &dashTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -429,16 +429,16 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of gameTask */
-  gameTaskHandle = osThreadNew(gameHandler, BUTTON_NONE, &gameTask_attributes);
+  gameTaskHandle = osThreadNew(gameHandler, NULL, &gameTask_attributes);
 
   /* creation of displayTask */
-  displayTaskHandle = osThreadNew(displayHandler, BUTTON_NONE, &displayTask_attributes);
+  displayTaskHandle = osThreadNew(displayHandler, NULL, &displayTask_attributes);
 
   /* creation of buttonTask */
-  buttonTaskHandle = osThreadNew(buttonHandler, BUTTON_NONE, &buttonTask_attributes);
+  buttonTaskHandle = osThreadNew(buttonHandler, NULL, &buttonTask_attributes);
 
   /* creation of ledTask */
-  ledTaskHandle = osThreadNew(ledHandler, BUTTON_NONE, &ledTask_attributes);
+  ledTaskHandle = osThreadNew(ledHandler, NULL, &ledTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1118,7 +1118,7 @@ static void MX_FSMC_Init(void)
   Timing.AccessMode = FSMC_ACCESS_MODE_A;
   /* ExtTiming */
 
-  if (HAL_SRAM_Init(&hsram1, &Timing, BUTTON_NONE) != HAL_OK)
+  if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
   {
     Error_Handler( );
   }
@@ -1153,7 +1153,7 @@ static void MX_FSMC_Init(void)
   Timing.AccessMode = FSMC_ACCESS_MODE_A;
   /* ExtTiming */
 
-  if (HAL_SRAM_Init(&hsram2, &Timing, BUTTON_NONE) != HAL_OK)
+  if (HAL_SRAM_Init(&hsram2, &Timing, NULL) != HAL_OK)
   {
     Error_Handler( );
   }
