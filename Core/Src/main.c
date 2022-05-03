@@ -188,9 +188,12 @@ GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
 
 BUTTONS buttonBuffer = NONE; // shared memory
 
-// shared memory, written to only by game thread
+// shared memory about choices for a problem
+// written to only by game thread
 int choices[4];
 int correctChoice = -1;
+// written to only by button thread ?
+int chosenChoice = -1;
 
 uint16_t BUTTON_COLORS[] = {LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN, LCD_COLOR_BLUE};
 
@@ -1185,6 +1188,8 @@ void displayHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    int PAD = 5;
+    int SQUARE_SIZE = 15;
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
     if (gameState == MAIN) {
       // TODO Display in Main game state
@@ -1198,23 +1203,50 @@ void displayHandler(void *argument)
       BSP_LCD_Clear(LCD_COLOR_WHITE);
 
       // Display user button choices
-      int SIZE = 15;
-      int PAD = 5;
+      
       for (int i = 0; i < 4; i++) {
-        int y = PAD + (SIZE + PAD) * i;
+        int y = PAD + (SQUARE_SIZE + PAD) * i;
         // display square of button color
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
-        BSP_LCD_FillRect(PAD, y, SIZE, SIZE);
+        BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
 
         // unsure if the type is right for this line to work?
         u_int8_t* letter = ALPHABET[choices[i]];
         
         // display text of corresponding letter option
-        BSP_LCD_DisplayStringAt(PAD * 2 + SIZE, y, letter, LEFT_MODE);
+        BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+        BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, y, letter, LEFT_MODE);
       }
 
     } else if (gameState == END) {
       // TODO Display in End game state: Correct/Incorrect answer
+      int y = PAD + (SQUARE_SIZE + PAD) * chosenChoice;
+      if (chosenChoice == correctChoice) {
+        // Display answer was correct
+        u_int8_t * correctMsg = "Correct!";
+        BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
+        BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, correctMsg, LEFT_MODE);
+
+        // Prompt play-again
+        int X = 50;
+        int Y = PAD * 5 + SQUARE_SIZE * 4;
+        u_int8_t * playAgainMsg = "Play Again?";
+        BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+        BSP_LCD_DisplayStringAt(X, Y, playAgainMsg, CENTER_MODE);
+
+        u_int8_t * yesMsg = "Yes";
+        BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
+        BSP_LCD_DisplayStringAt(X - PAD, Y + PAD + SQUARE_SIZE, yesMsg, RIGHT_MODE);
+        
+        u_int8_t * noMsg = "No";
+        BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
+        BSP_LCD_DisplayStringAt(X + PAD, Y + PAD + SQUARE_SIZE, noMsg, LEFT_MODE);
+      } else {
+        // Display answer was incorrect
+        BSP_LCD_SetTextColor(LCD_COLOR_RED);
+        u_int8_t * incorrectChar = "X";
+        BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, incorrectChar, LEFT_MODE);
+      }
     }
 
     osSemaphoreRelease(displaySemEMPTYHandle);
