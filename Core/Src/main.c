@@ -25,7 +25,6 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "stm32f413h_discovery_lcd.h"
-#include "stm32f413h_discovery_lcd.c"
 #include <stdbool.h>
 /* USER CODE END Includes */
 

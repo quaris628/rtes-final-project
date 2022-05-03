@@ -157,6 +157,7 @@ sourceFiles:
   - Src/**
   - Core/Src/**
   - Core/Lib/**
+  - Drivers/BSP/**
 
 
 # When no makefile is present it will show a warning pop-up.
