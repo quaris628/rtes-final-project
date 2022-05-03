@@ -154,39 +154,39 @@ const osSemaphoreAttr_t ledSEMEmpty_attributes = {
   .name = "ledSEMEmpty"
 };
 /* USER CODE BEGIN PV */
-MORSE A[] = { DOT, DASH };
-MORSE B[] = { DASH, DOT, DOT, DOT };
-MORSE C[] = { DASH, DOT, DASH, DOT }; 
-MORSE D[] = { DASH, DOT, DOT };
-MORSE E[] = { DOT };
-MORSE F[] = { DOT, DOT, DASH, DOT };
-MORSE G[] = { DASH, DASH, DOT };
-MORSE H[] = { DOT, DOT, DOT, DOT };
-MORSE I[] = { DOT, DOT };
-MORSE J[] = { DOT, DASH, DASH, DASH };
-MORSE K[] = { DASH, DOT, DASH };
-MORSE L[] = { DOT, DASH, DOT, DOT };
-MORSE M[] = { DASH, DASH };
-MORSE N[] = { DASH, DOT };
-MORSE O[] = { DASH, DASH, DASH };
-MORSE P[] = { DOT, DASH, DASH, DOT };
-MORSE Q[] = { DASH, DASH, DOT, DASH };
-MORSE R[] = { DOT, DASH, DOT };
-MORSE S[] = { DOT, DOT, DOT };
-MORSE T[] = { DASH };
-MORSE U[] = { DOT, DOT, DASH };
-MORSE V[] = { DOT, DOT, DOT, DASH };
-MORSE W[] = { DOT, DASH, DASH };
-MORSE X[] = { DASH, DOT, DOT, DASH };
-MORSE Y[] = { DASH, DOT, DASH, DASH };
-MORSE Z[] = { DASH, DASH, DOT, DOT };
+MORSE A[] = { DOT, DASH, MORSE_NONE };
+MORSE B[] = { DASH, DOT, DOT, DOT, MORSE_NONE };
+MORSE C[] = { DASH, DOT, DASH, DOT, MORSE_NONE }; 
+MORSE D[] = { DASH, DOT, DOT, MORSE_NONE };
+MORSE E[] = { DOT, MORSE_NONE };
+MORSE F[] = { DOT, DOT, DASH, DOT, MORSE_NONE };
+MORSE G[] = { DASH, DASH, DOT, MORSE_NONE };
+MORSE H[] = { DOT, DOT, DOT, DOT, MORSE_NONE };
+MORSE I[] = { DOT, DOT, MORSE_NONE };
+MORSE J[] = { DOT, DASH, DASH, DASH, MORSE_NONE };
+MORSE K[] = { DASH, DOT, DASH, MORSE_NONE };
+MORSE L[] = { DOT, DASH, DOT, DOT, MORSE_NONE };
+MORSE M[] = { DASH, DASH, MORSE_NONE };
+MORSE N[] = { DASH, DOT, MORSE_NONE };
+MORSE O[] = { DASH, DASH, DASH, MORSE_NONE };
+MORSE P[] = { DOT, DASH, DASH, DOT, MORSE_NONE };
+MORSE Q[] = { DASH, DASH, DOT, DASH, MORSE_NONE };
+MORSE R[] = { DOT, DASH, DOT, MORSE_NONE };
+MORSE S[] = { DOT, DOT, DOT, MORSE_NONE };
+MORSE T[] = { DASH, MORSE_NONE };
+MORSE U[] = { DOT, DOT, DASH, MORSE_NONE };
+MORSE V[] = { DOT, DOT, DOT, DASH, MORSE_NONE };
+MORSE W[] = { DOT, DASH, DASH, MORSE_NONE };
+MORSE X[] = { DASH, DOT, DOT, DASH, MORSE_NONE };
+MORSE Y[] = { DASH, DOT, DASH, DASH, MORSE_NONE };
+MORSE Z[] = { DASH, DASH, DOT, DOT, MORSE_NONE };
 
 MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
 MORSE ledBuffer = DOT;
 
 GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
 
-BUTTONS buttonBuffer = NONE; // shared memory
+BUTTONS buttonBuffer = BUTTON_NONE; // shared memory
 
 // shared memory about choices for a problem
 // written to only by game thread
@@ -293,11 +293,11 @@ void gameProblem() {
   //TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-  // for (int i = 0; i < sizeof(letters[letterNum]) / sizeof(MORSE); i++) {
-  //   osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
-  //   //ledBuffer = letters[letterNum][i]; TODO: Change to buffer
-  //   osSemaphoreRelease(ledSemFULLHandle);
-  // }
+  for (int i = 0; letters[choices[correctChoice]][i] != MORSE_NONE; i++) {
+    osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
+    ledBuffer = letters[choices[correctChoice]][i];
+    osSemaphoreRelease(ledSemFULLHandle);
+  }
 
   //Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
@@ -411,13 +411,13 @@ int main(void)
 
   /* Create the timer(s) */
   /* creation of problemTimeout */
-  problemTimeoutHandle = osTimerNew(problemTimeoutCallback, osTimerOnce, NULL, &problemTimeout_attributes);
+  problemTimeoutHandle = osTimerNew(problemTimeoutCallback, osTimerOnce, BUTTON_NONE, &problemTimeout_attributes);
 
   /* creation of dotTimer */
-  dotTimerHandle = osTimerNew(dotCallback, osTimerOnce, NULL, &dotTimer_attributes);
+  dotTimerHandle = osTimerNew(dotCallback, osTimerOnce, BUTTON_NONE, &dotTimer_attributes);
 
   /* creation of dashTimer */
-  dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, NULL, &dashTimer_attributes);
+  dashTimerHandle = osTimerNew(dashCallback, osTimerOnce, BUTTON_NONE, &dashTimer_attributes);
 
   /* USER CODE BEGIN RTOS_TIMERS */
   /* start timers, add new ones, ... */
@@ -429,16 +429,16 @@ int main(void)
 
   /* Create the thread(s) */
   /* creation of gameTask */
-  gameTaskHandle = osThreadNew(gameHandler, NULL, &gameTask_attributes);
+  gameTaskHandle = osThreadNew(gameHandler, BUTTON_NONE, &gameTask_attributes);
 
   /* creation of displayTask */
-  displayTaskHandle = osThreadNew(displayHandler, NULL, &displayTask_attributes);
+  displayTaskHandle = osThreadNew(displayHandler, BUTTON_NONE, &displayTask_attributes);
 
   /* creation of buttonTask */
-  buttonTaskHandle = osThreadNew(buttonHandler, NULL, &buttonTask_attributes);
+  buttonTaskHandle = osThreadNew(buttonHandler, BUTTON_NONE, &buttonTask_attributes);
 
   /* creation of ledTask */
-  ledTaskHandle = osThreadNew(ledHandler, NULL, &ledTask_attributes);
+  ledTaskHandle = osThreadNew(ledHandler, BUTTON_NONE, &ledTask_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1118,7 +1118,7 @@ static void MX_FSMC_Init(void)
   Timing.AccessMode = FSMC_ACCESS_MODE_A;
   /* ExtTiming */
 
-  if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
+  if (HAL_SRAM_Init(&hsram1, &Timing, BUTTON_NONE) != HAL_OK)
   {
     Error_Handler( );
   }
@@ -1153,7 +1153,7 @@ static void MX_FSMC_Init(void)
   Timing.AccessMode = FSMC_ACCESS_MODE_A;
   /* ExtTiming */
 
-  if (HAL_SRAM_Init(&hsram2, &Timing, NULL) != HAL_OK)
+  if (HAL_SRAM_Init(&hsram2, &Timing, BUTTON_NONE) != HAL_OK)
   {
     Error_Handler( );
   }
@@ -1294,7 +1294,7 @@ void buttonHandler(void *argument)
   {
     status = osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
     status = osMutexAcquire(buttonMutexHandle, osWaitForever);
-    buttonBuffer = NONE;
+    buttonBuffer = BUTTON_NONE;
     bool buttonPressed = false;
 
     while(!buttonPressed) {
@@ -1372,6 +1372,9 @@ void ledHandler(void *argument)
     {
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, SET);
       osTimerStart(dashTimerHandle, 1000);
+    }
+    else{
+      osSemaphoreRelease(ledSEMEmptyHandle);
     }
   }
   /* USER CODE END ledHandler */

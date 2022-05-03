@@ -45,13 +45,14 @@ typedef enum
 
 typedef enum
 {
+  MORSE_NONE,
   DOT,
   DASH
 } MORSE;
 
 typedef enum
 {
-  NONE,
+  BUTTON_NONE,
   BLUE,
   RED,
   YELLOW,
