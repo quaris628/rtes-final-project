@@ -3,5 +3,6 @@
   "cortex-debug.openocdPath": "C:\\USERS\\ADAMR\\APPDATA\\ROAMING\\CODE\\USER\\GLOBALSTORAGE\\BMD.STM32-FOR-VSCODE\\@XPACK-DEV-TOOLS\\OPENOCD\\0.11.0-4.1\\.CONTENT\\BIN\\OPENOCD.EXE",
   "files.associations": {
     "stm32f413h_discovery_lcd.h": "c"
-  }
+  },
+  "cSpell.diagnosticLevel": "Hint"
 }

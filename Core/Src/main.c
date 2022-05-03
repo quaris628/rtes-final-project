@@ -53,11 +53,11 @@ DFSDM_Channel_HandleTypeDef hdfsdm2_channel7;
 
 FMPI2C_HandleTypeDef hfmpi2c1;
 
+I2C_HandleTypeDef hi2c2;
+
 I2S_HandleTypeDef hi2s2;
 
 QSPI_HandleTypeDef hqspi;
-
-SD_HandleTypeDef hsd;
 
 UART_HandleTypeDef huart10;
 UART_HandleTypeDef huart6;
@@ -69,7 +69,7 @@ SRAM_HandleTypeDef hsram2;
 osThreadId_t gameTaskHandle;
 const osThreadAttr_t gameTask_attributes = {
   .name = "gameTask",
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
   .stack_size = 128 * 4
 };
 /* Definitions for displayTask */
@@ -199,9 +199,9 @@ static void MX_FMPI2C1_Init(void);
 static void MX_FSMC_Init(void);
 static void MX_I2S2_Init(void);
 static void MX_QUADSPI_Init(void);
-static void MX_SDIO_SD_Init(void);
 static void MX_UART10_Init(void);
 static void MX_USART6_UART_Init(void);
+static void MX_I2C2_Init(void);
 void gameHandler(void *argument);
 void displayHandler(void *argument);
 void buttonHandler(void *argument);
@@ -240,15 +240,10 @@ uint32_t TM_RNG_Get(void)
 }
 
 void gameMain() {
-  //Lock button press and display main menu
-  osMutexAcquire(buttonMutexHandle, osWaitForever);
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
   //TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-  //Get next button press
-  osSemaphoreRelease(buttonSemFULLHandle); 
-  osMutexRelease(buttonMutexHandle);
 
   //Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
@@ -259,23 +254,25 @@ void gameMain() {
 
 void gameProblem() {
   //Lock button press and display problem
-  osMutexAcquire(buttonMutexHandle, osWaitForever);
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
   int letterNum = TM_RNG_Get() % 26;
   
   //TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-  for (int i = 0; i < sizeof(letters[letterNum]) / sizeof(MORSE); i++) {
-    osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
-    //ledBuffer = letters[letterNum][i]; TODO: Change to buffer
-    osSemaphoreRelease(ledSemFULLHandle);
-  }
+  // for (int i = 0; i < sizeof(letters[letterNum]) / sizeof(MORSE); i++) {
+  //   osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
+  //   //ledBuffer = letters[letterNum][i]; TODO: Change to buffer
+  //   osSemaphoreRelease(ledSemFULLHandle);
+  // }
 
   //Get next button press
-  osSemaphoreRelease(buttonSemFULLHandle); 
-  osMutexRelease(buttonMutexHandle);
+  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
+  if(status == osErrorTimeout)
+  {
+    Error_Handler();
+  }
   //Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
   //TODO: Handle button press
@@ -286,7 +283,7 @@ void gameProblem() {
 void gameEnd() {
   for (;;)
   {
-    
+    osDelay(2000);
   }
 }
 /* USER CODE END 0 */
@@ -327,9 +324,9 @@ int main(void)
   MX_FSMC_Init();
   MX_I2S2_Init();
   MX_QUADSPI_Init();
-  MX_SDIO_SD_Init();
   MX_UART10_Init();
   MX_USART6_UART_Init();
+  MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
   TM_RNG_Init();
   /* USER CODE END 2 */
@@ -370,7 +367,9 @@ int main(void)
   ledSEMEmptyHandle = osSemaphoreNew(1, 1, &ledSEMEmpty_attributes);
 
   /* USER CODE BEGIN RTOS_SEMAPHORES */
-  /* add semaphores, ... */
+  osSemaphoreRelease(displaySemFULLHandle);
+  osSemaphoreRelease(ledSemFULLHandle);
+  osSemaphoreRelease(buttonSemEMPTYHandle);
   /* USER CODE END RTOS_SEMAPHORES */
 
   /* Create the timer(s) */
@@ -469,15 +468,13 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S_APB1|RCC_PERIPHCLK_DFSDM1
-                              |RCC_PERIPHCLK_SDIO|RCC_PERIPHCLK_CLK48
-                              |RCC_PERIPHCLK_FMPI2C1;
+                              |RCC_PERIPHCLK_CLK48|RCC_PERIPHCLK_FMPI2C1;
   PeriphClkInitStruct.PLLI2S.PLLI2SN = 50;
   PeriphClkInitStruct.PLLI2S.PLLI2SM = 12;
   PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
   PeriphClkInitStruct.PLLI2S.PLLI2SQ = 2;
   PeriphClkInitStruct.Clk48ClockSelection = RCC_CLK48CLKSOURCE_PLLQ;
   PeriphClkInitStruct.Dfsdm1ClockSelection = RCC_DFSDM1CLKSOURCE_APB2;
-  PeriphClkInitStruct.SdioClockSelection = RCC_SDIOCLKSOURCE_SYSCLK;
   PeriphClkInitStruct.PLLI2SSelection = RCC_PLLI2SCLKSOURCE_PLLSRC;
   PeriphClkInitStruct.I2sApb1ClockSelection = RCC_I2SAPB1CLKSOURCE_PLLI2S;
   PeriphClkInitStruct.Fmpi2c1ClockSelection = RCC_FMPI2C1CLKSOURCE_APB;
@@ -709,6 +706,40 @@ static void MX_FMPI2C1_Init(void)
 }
 
 /**
+  * @brief I2C2 Initialization Function
+  * @param None
+  * @retval None
+  */
+static void MX_I2C2_Init(void)
+{
+
+  /* USER CODE BEGIN I2C2_Init 0 */
+
+  /* USER CODE END I2C2_Init 0 */
+
+  /* USER CODE BEGIN I2C2_Init 1 */
+
+  /* USER CODE END I2C2_Init 1 */
+  hi2c2.Instance = I2C2;
+  hi2c2.Init.ClockSpeed = 100000;
+  hi2c2.Init.DutyCycle = I2C_DUTYCYCLE_2;
+  hi2c2.Init.OwnAddress1 = 0;
+  hi2c2.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c2.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c2.Init.OwnAddress2 = 0;
+  hi2c2.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c2.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /* USER CODE BEGIN I2C2_Init 2 */
+
+  /* USER CODE END I2C2_Init 2 */
+
+}
+
+/**
   * @brief I2S2 Initialization Function
   * @param None
   * @retval None
@@ -774,42 +805,6 @@ static void MX_QUADSPI_Init(void)
   /* USER CODE BEGIN QUADSPI_Init 2 */
 
   /* USER CODE END QUADSPI_Init 2 */
-
-}
-
-/**
-  * @brief SDIO Initialization Function
-  * @param None
-  * @retval None
-  */
-static void MX_SDIO_SD_Init(void)
-{
-
-  /* USER CODE BEGIN SDIO_Init 0 */
-
-  /* USER CODE END SDIO_Init 0 */
-
-  /* USER CODE BEGIN SDIO_Init 1 */
-
-  /* USER CODE END SDIO_Init 1 */
-  hsd.Instance = SDIO;
-  hsd.Init.ClockEdge = SDIO_CLOCK_EDGE_RISING;
-  hsd.Init.ClockBypass = SDIO_CLOCK_BYPASS_DISABLE;
-  hsd.Init.ClockPowerSave = SDIO_CLOCK_POWER_SAVE_DISABLE;
-  hsd.Init.BusWide = SDIO_BUS_WIDE_1B;
-  hsd.Init.HardwareFlowControl = SDIO_HARDWARE_FLOW_CONTROL_DISABLE;
-  hsd.Init.ClockDiv = 0;
-  if (HAL_SD_Init(&hsd) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  if (HAL_SD_ConfigWideBusOperation(&hsd, SDIO_BUS_WIDE_4B) != HAL_OK)
-  {
-    Error_Handler();
-  }
-  /* USER CODE BEGIN SDIO_Init 2 */
-
-  /* USER CODE END SDIO_Init 2 */
 
 }
 
@@ -899,43 +894,43 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, LED1_RED_Pin|MEMS_LED_Pin|LCD_BL_CTRL_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(LED2_GREEN_GPIO_Port, LED2_GREEN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, LCD_CTP_RST_Pin|LCD_TE_Pin|WIFI_WKUP_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(USB_OTG_FS_PWR_EN_GPIO_Port, USB_OTG_FS_PWR_EN_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOG, GPIO_PIN_8, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : LED1_RED_Pin MEMS_LED_Pin LCD_BL_CTRL_Pin */
-  GPIO_InitStruct.Pin = LED1_RED_Pin|MEMS_LED_Pin|LCD_BL_CTRL_Pin;
+  /*Configure GPIO pins : PE3 PE4 PE5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D5_Pin */
-  GPIO_InitStruct.Pin = ARD_D5_Pin;
+  /*Configure GPIO pin : PE6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF3_TIM9;
-  HAL_GPIO_Init(ARD_D5_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PF6 PF7 PF10 SD_Detect_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_10|SD_Detect_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  /*Configure GPIO pins : PF6 PF7 PF10 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_10;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : CTP_INT_Pin */
-  GPIO_InitStruct.Pin = CTP_INT_Pin;
+  /*Configure GPIO pin : PC1 */
+  GPIO_InitStruct.Pin = GPIO_PIN_1;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(CTP_INT_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
   /*Configure GPIO pin : PA0 */
   GPIO_InitStruct.Pin = GPIO_PIN_0;
@@ -943,80 +938,102 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : LED2_GREEN_Pin */
-  GPIO_InitStruct.Pin = LED2_GREEN_Pin;
+  /*Configure GPIO pin : PA6 */
+  GPIO_InitStruct.Pin = GPIO_PIN_6;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PC5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(LED2_GREEN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D6_Pin */
-  GPIO_InitStruct.Pin = ARD_D6_Pin;
+  /*Configure GPIO pin : PB0 */
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM3;
-  HAL_GPIO_Init(ARD_D6_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pins : ARD_D15_Pin ARD_D14_Pin */
-  GPIO_InitStruct.Pin = ARD_D15_Pin|ARD_D14_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_AF_OD;
-  GPIO_InitStruct.Pull = GPIO_PULLUP;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  GPIO_InitStruct.Alternate = GPIO_AF4_I2C2;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D13_Pin */
-  GPIO_InitStruct.Pin = ARD_D13_Pin;
+  /*Configure GPIO pin : PF11 */
+  GPIO_InitStruct.Pin = GPIO_PIN_11;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PB12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF7_SPI3;
-  HAL_GPIO_Init(ARD_D13_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : LCD_CTP_RST_Pin LCD_TE_Pin WIFI_WKUP_Pin */
-  GPIO_InitStruct.Pin = LCD_CTP_RST_Pin|LCD_TE_Pin|WIFI_WKUP_Pin;
+  /*Configure GPIO pins : PB13 PB14 PB15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : USB_OTG_FS_PWR_EN_Pin */
-  GPIO_InitStruct.Pin = USB_OTG_FS_PWR_EN_Pin;
+  /*Configure GPIO pin : PG8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(USB_OTG_FS_PWR_EN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D10_Pin */
-  GPIO_InitStruct.Pin = ARD_D10_Pin;
+  /*Configure GPIO pins : PC8 PC9 PC10 PC11
+                           PC12 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
+                          |GPIO_PIN_12;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = GPIO_AF12_SDIO;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PA15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF1_TIM2;
-  HAL_GPIO_Init(ARD_D10_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : PG13 CODEC_INT_Pin */
-  GPIO_InitStruct.Pin = GPIO_PIN_13|CODEC_INT_Pin;
+  /*Configure GPIO pin : PG13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : PG15 */
+  GPIO_InitStruct.Pin = GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : ARD_D12_Pin ARD_D11_Pin */
-  GPIO_InitStruct.Pin = ARD_D12_Pin|ARD_D11_Pin;
+  /*Configure GPIO pins : PB4 PB5 */
+  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = GPIO_AF6_SPI3;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : ARD_D9_Pin */
-  GPIO_InitStruct.Pin = ARD_D9_Pin;
+  /*Configure GPIO pin : PB8 */
+  GPIO_InitStruct.Pin = GPIO_PIN_8;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
-  HAL_GPIO_Init(ARD_D9_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
 }
 
@@ -1046,7 +1063,7 @@ static void MX_FSMC_Init(void)
   hsram1.Init.BurstAccessMode = FSMC_BURST_ACCESS_MODE_DISABLE;
   hsram1.Init.WaitSignalPolarity = FSMC_WAIT_SIGNAL_POLARITY_LOW;
   hsram1.Init.WaitSignalActive = FSMC_WAIT_TIMING_BEFORE_WS;
-  hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_DISABLE;
+  hsram1.Init.WriteOperation = FSMC_WRITE_OPERATION_ENABLE;
   hsram1.Init.WaitSignal = FSMC_WAIT_SIGNAL_DISABLE;
   hsram1.Init.ExtendedMode = FSMC_EXTENDED_MODE_DISABLE;
   hsram1.Init.AsynchronousWait = FSMC_ASYNCHRONOUS_WAIT_DISABLE;
@@ -1131,7 +1148,7 @@ void gameHandler(void *argument)
     switch (gameState)
     {
     case MAIN:
-      gameEnd();
+      gameMain();
       break;
     case PROBLEM:
       gameProblem();
@@ -1140,6 +1157,7 @@ void gameHandler(void *argument)
       gameEnd();
       break;
     }
+    osDelay(1);
   }
   /* USER CODE END 5 */
 }
@@ -1157,6 +1175,9 @@ void displayHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
+    osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
+    //TODO: Add dispaly funct
+    osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
   }
   /* USER CODE END displayHandler */
@@ -1172,11 +1193,12 @@ void displayHandler(void *argument)
 void buttonHandler(void *argument)
 {
   /* USER CODE BEGIN buttonHandler */
+  osStatus_t status;
   /* Infinite loop */
   for(;;)
   {
-    osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
-    osMutexAcquire(buttonHandler, osWaitForever);
+    status = osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
+    status = osMutexAcquire(buttonMutexHandle, osWaitForever);
     buttonBuffer = NONE;
     bool buttonPressed = false;
 
@@ -1226,8 +1248,8 @@ void buttonHandler(void *argument)
 
     }
 
-    osMutexRelease(buttonHandler);
-    osSemaphoreRelease(buttonSemFULLHandle);
+    status = osMutexRelease(buttonMutexHandle);
+    status = osSemaphoreRelease(buttonSemFULLHandle);
   }
   /* USER CODE END buttonHandler */
 }
@@ -1245,7 +1267,7 @@ void ledHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    osDelay(1);
+    osDelay(10000);
   }
   /* USER CODE END ledHandler */
 }
@@ -1254,7 +1276,7 @@ void ledHandler(void *argument)
 void problemTimeoutCallback(void *argument)
 {
   /* USER CODE BEGIN problemTimeoutCallback */
-
+  osDelay(2000);
   /* USER CODE END problemTimeoutCallback */
 }
 
@@ -1262,7 +1284,7 @@ void problemTimeoutCallback(void *argument)
 void dotCallback(void *argument)
 {
   /* USER CODE BEGIN dotCallback */
-
+  osDelay(2000);
   /* USER CODE END dotCallback */
 }
 
@@ -1270,7 +1292,7 @@ void dotCallback(void *argument)
 void dashCallback(void *argument)
 {
   /* USER CODE BEGIN dashCallback */
-
+  osDelay(2000);
   /* USER CODE END dashCallback */
 }
 
@@ -1303,7 +1325,14 @@ void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-
+  for (;;) {
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
+    HAL_Delay(200);
+    HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
+    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
+    HAL_Delay(200);
+    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
+  }
   /* USER CODE END Error_Handler_Debug */
 }
 
