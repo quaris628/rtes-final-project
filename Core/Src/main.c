@@ -1236,11 +1236,13 @@ void displayHandler(void *argument)
     if (gameState == MAIN) {
       // Display in Main game state
       BSP_LCD_Clear(LCD_COLOR_WHITE);
-      u_int8_t * welcomeMsg = "Welcome to the morse code tutor!";
-      u_int8_t * pressAnyButtonMsg = "Press any button to continue";
+      u_int8_t * welcomeMsg1 = "Welcome to the";
+      u_int8_t * welcomeMsg2 = "morse code tutor!";
+      u_int8_t * pressAnyButtonMsg = "Press any button";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-      BSP_LCD_DisplayStringAt(300, 300, welcomeMsg, CENTER_MODE);
-      BSP_LCD_DisplayStringAt(400, 300 + CHAR_HEIGHT + PAD, pressAnyButtonMsg, CENTER_MODE);
+      BSP_LCD_DisplayStringAt(0, 300, welcomeMsg1, CENTER_MODE);
+      BSP_LCD_DisplayStringAt(0, 300 + CHAR_HEIGHT + PAD, welcomeMsg2, CENTER_MODE);
+      BSP_LCD_DisplayStringAt(0, 300 + 2 * (CHAR_HEIGHT + PAD), pressAnyButtonMsg, CENTER_MODE);
     } else if (gameState == PROBLEM) {
       // Clear LCD
       BSP_LCD_Clear(LCD_COLOR_WHITE);
@@ -1263,6 +1265,7 @@ void displayHandler(void *argument)
         }
         int charX = PAD + (SQUARE_SIZE - CHAR_WIDTH) / 2;
         int charY = y + (SQUARE_SIZE - CHAR_HEIGHT) / 2;
+        BSP_LCD_SetBackColor(BUTTON_COLORS[i]);
         BSP_LCD_DisplayChar(charX, charY, letter);
       }
 
@@ -1287,15 +1290,15 @@ void displayHandler(void *argument)
       int Y = PAD * 5 + SQUARE_SIZE * 4;
       u_int8_t * playAgainMsg = "Play Again?";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-      BSP_LCD_DisplayStringAt(X, Y, playAgainMsg, CENTER_MODE);
+      BSP_LCD_DisplayStringAt(0, Y, playAgainMsg, CENTER_MODE);
 
       u_int8_t * yesMsg = "Yes";
       BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
-      BSP_LCD_DisplayStringAt(X - PAD / 2, Y + PAD + CHAR_HEIGHT, yesMsg, RIGHT_MODE);
+      BSP_LCD_DisplayStringAt(-PAD / 2 - CHAR_WIDTH * 3, Y + PAD + CHAR_HEIGHT, yesMsg, CENTER_MODE);
       
       u_int8_t * noMsg = "No";
       BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
-      BSP_LCD_DisplayStringAt(X + PAD / 2, Y + PAD + CHAR_HEIGHT, noMsg, LEFT_MODE);
+      BSP_LCD_DisplayStringAt(PAD / 2, Y + PAD + CHAR_HEIGHT, noMsg, CENTER_MODE);
     }
     osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
