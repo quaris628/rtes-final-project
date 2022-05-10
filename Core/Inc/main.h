@@ -39,6 +39,7 @@ extern "C" {
 typedef enum
 {
   MAIN,
+  PROBLEM_GENERATION,
   PROBLEM,
   END
 } GAME_STATES;
