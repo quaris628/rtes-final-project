@@ -1234,7 +1234,13 @@ void displayHandler(void *argument)
     int CHAR_HEIGHT = 5;
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
     if (gameState == MAIN) {
-      // TODO Display in Main game state
+      // Display in Main game state
+      BSP_LCD_Clear(LCD_COLOR_WHITE);
+      u_int8_t * welcomeMsg = "Welcome to the morse code tutor!";
+      u_int8_t * pressAnyButtonMsg = "Press any button to continue";
+      BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+      BSP_LCD_DisplayStringAt(300, 300, welcomeMsg, CENTER_MODE);
+      BSP_LCD_DisplayStringAt(400, 300 + CHAR_HEIGHT + PAD, pressAnyButtonMsg, CENTER_MODE);
     } else if (gameState == PROBLEM) {
       // Clear LCD
       BSP_LCD_Clear(LCD_COLOR_WHITE);
@@ -1285,11 +1291,11 @@ void displayHandler(void *argument)
 
       u_int8_t * yesMsg = "Yes";
       BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
-      BSP_LCD_DisplayStringAt(X - PAD, Y + PAD + SQUARE_SIZE, yesMsg, RIGHT_MODE);
+      BSP_LCD_DisplayStringAt(X - PAD / 2, Y + PAD + CHAR_HEIGHT, yesMsg, RIGHT_MODE);
       
       u_int8_t * noMsg = "No";
       BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
-      BSP_LCD_DisplayStringAt(X + PAD, Y + PAD + SQUARE_SIZE, noMsg, LEFT_MODE);
+      BSP_LCD_DisplayStringAt(X + PAD / 2, Y + PAD + CHAR_HEIGHT, noMsg, LEFT_MODE);
     }
     osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
