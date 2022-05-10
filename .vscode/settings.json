@@ -1,8 +1,11 @@
 {
-  "cortex-debug.armToolchainPath": "c:\\Users\\adamr\\AppData\\Roaming\\Code\\User\\globalStorage\\bmd.stm32-for-vscode\\@xpack-dev-tools\\arm-none-eabi-gcc\\10.3.1-2.3.1\\.content\\bin",
-  "cortex-debug.openocdPath": "C:\\USERS\\ADAMR\\APPDATA\\ROAMING\\CODE\\USER\\GLOBALSTORAGE\\BMD.STM32-FOR-VSCODE\\@XPACK-DEV-TOOLS\\OPENOCD\\0.11.0-4.1\\.CONTENT\\BIN\\OPENOCD.EXE",
+  "cortex-debug.armToolchainPath": "c:\\Users\\Desktop\\AppData\\Roaming\\Code\\User\\globalStorage\\bmd.stm32-for-vscode\\@xpack-dev-tools\\arm-none-eabi-gcc\\10.3.1-2.3.1\\.content\\bin",
+  "cortex-debug.openocdPath": "C:\\USERS\\DESKTOP\\APPDATA\\ROAMING\\CODE\\USER\\GLOBALSTORAGE\\BMD.STM32-FOR-VSCODE\\@XPACK-DEV-TOOLS\\OPENOCD\\0.11.0-4.1\\.CONTENT\\BIN\\OPENOCD.EXE",
   "files.associations": {
     "stm32f413h_discovery_lcd.h": "c"
   },
-  "cSpell.diagnosticLevel": "Hint"
+  "cSpell.diagnosticLevel": "Hint",
+  "stm32-for-vscode.openOCDPath": "C:\\USERS\\DESKTOP\\APPDATA\\ROAMING\\CODE\\USER\\GLOBALSTORAGE\\BMD.STM32-FOR-VSCODE\\@XPACK-DEV-TOOLS\\OPENOCD\\0.11.0-4.1\\.CONTENT\\BIN\\OPENOCD.EXE",
+  "stm32-for-vscode.makePath": "C:\\USERS\\DESKTOP\\APPDATA\\ROAMING\\CODE\\USER\\GLOBALSTORAGE\\BMD.STM32-FOR-VSCODE\\@XPACK-DEV-TOOLS\\WINDOWS-BUILD-TOOLS\\4.3.0-1.1\\.CONTENT\\BIN\\MAKE.EXE",
+  "stm32-for-vscode.armToolchainPath": "c:\\Users\\Desktop\\AppData\\Roaming\\Code\\User\\globalStorage\\bmd.stm32-for-vscode\\@xpack-dev-tools\\arm-none-eabi-gcc\\10.3.1-2.3.1\\.content\\bin"
 }

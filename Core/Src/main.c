@@ -259,30 +259,27 @@ void gameMain() {
   //Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
   //TODO: Handle button press
-  gameState = PROBLEM;
+  gameState = PROBLEM_GENERATION;
 
+  osSemaphoreRelease(buttonSemEMPTYHandle);
+}
+
+void gameProblemGeneration() {
   // generate random problem
-  // do this in MAIN and before PROBLEM so gameProblem() can
-  //     be re-used for when the user gets the problem incorrect.
-  choices[0] = TM_RNG_Get() % 26;
-  for (int i = 1; i < 4; i++) {
-    // 2nd choice has 25 possibilities, 3rd choice has 24, etc
-    choices[i] = TM_RNG_Get() % (26 - i);
-    // shift choice up one index if a previous choice is <= to this choice
-    // (to correct for the decreased maximum value that choices[i] can be and
-    //    make all choices distinct)
-    for (int j = 0; j < i; j++) {
-      if (choices[j] <= choices[i]) {
-        choices[i]++;
-      }
-    }
+  int allLetters[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+      16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+  for (int i = 0; i < 4; i++) {
+    int randI = i + TM_RNG_Get() % (26 - i);
+    int temp = allLetters[i];
+    allLetters[i] = allLetters[randI];
+    allLetters[randI] = temp;
+    choices[i] = allLetters[i];
   }
   correctChoice = TM_RNG_Get() % 4;
   chosenChoice = -1;
   // I believe there's no strict need for a mutex or semaphore on
   //     the shared memory for choices info?
-
-  osSemaphoreRelease(buttonSemEMPTYHandle);
+  gameState = PROBLEM;
 }
 
 void gameProblem() {
@@ -302,7 +299,7 @@ void gameProblem() {
   //Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
-   if(status == osErrorTimeout) {
+  if(status == osErrorTimeout) {
     chosenChoice = -1;
   } else {
     // Handle button press
@@ -328,7 +325,7 @@ void gameEnd() {
     if((int)buttonBuffer == 1) {
       // if said yes, play again
       // TODO change to generate problem state
-      gameState = PROBLEM;
+      gameState = PROBLEM_GENERATION;
     } else {
       // if said no, don't play again
       gameState = MAIN;
@@ -1202,6 +1199,9 @@ void gameHandler(void *argument)
     {
     case MAIN:
       gameMain();
+      break;
+    case PROBLEM_GENERATION:
+      gameProblemGeneration();
       break;
     case PROBLEM:
       gameProblem();
