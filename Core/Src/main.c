@@ -190,6 +190,8 @@ uint16_t BUTTON_COLORS[] = {LCD_COLOR_BLUE, LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD
 
 // Signaling definitions
 static TaskHandle_t ledTaskNotify = NULL;
+static TaskHandle_t gameTaskNotify = NULL;
+static TaskHandle_t buttonTaskNotify = NULL;
 
 /* USER CODE END PV */
 
@@ -1191,6 +1193,7 @@ void gameHandler(void *argument)
   /* init code for USB_HOST */
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 5 */
+  gameTaskNotify = xTaskGetCurrentTaskHandle();
   /* Infinite loop */
   for (;;)
   {
@@ -1311,12 +1314,19 @@ void buttonHandler(void *argument)
 {
   /* USER CODE BEGIN buttonHandler */
   osStatus_t status;
+  buttonTaskNotify = xTaskGetCurrentTaskHandle();
   /* Infinite loop */
   for (;;)
   {
-    status = osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
-    status = osMutexAcquire(buttonMutexHandle, osWaitForever);
-    buttonBuffer = BUTTON_NONE;
+    const TickType_t xMaxBlockTime = portMAX_DELAY;
+
+    /* Wait to be notified that the transmission is complete.  Note
+      the first parameter is pdTRUE, which has the effect of clearing
+      the task's notification value back to 0, making the notification
+      value act like a binary (rather than a counting) semaphore.  */
+    uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
+
+        buttonBuffer = BUTTON_NONE;
     bool buttonPressed = false;
 
     while (!buttonPressed)
