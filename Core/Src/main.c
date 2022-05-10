@@ -1237,7 +1237,7 @@ void displayHandler(void *argument)
       // Display in Main game state
       BSP_LCD_Clear(LCD_COLOR_WHITE);
       u_int8_t * welcomeMsg1 = "Welcome to the";
-      u_int8_t * welcomeMsg2 = "morse code tutor!";
+      u_int8_t * welcomeMsg2 = "Morse Code Tutor!";
       u_int8_t * pressAnyButtonMsg = "Press any button";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
       BSP_LCD_DisplayStringAt(0, 300, welcomeMsg1, CENTER_MODE);
@@ -1258,7 +1258,7 @@ void displayHandler(void *argument)
         char letter = choices[i] + 'A';
         
         // display text of corresponding letter option on top of colored square
-        if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW) {
+        if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN) {
           BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
         } else {
           BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
@@ -1268,11 +1268,12 @@ void displayHandler(void *argument)
         BSP_LCD_SetBackColor(BUTTON_COLORS[i]);
         BSP_LCD_DisplayChar(charX, charY, letter);
       }
+      BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
 
     } else if (gameState == END) {
       // Display in End game state: Correct/Incorrect answer
-      int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice;
-      int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice;
+      int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
+      int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       u_int8_t * correctMsg = "Correct!";
       if (chosenChoice != correctChoice) {
         // Display answer was incorrect
