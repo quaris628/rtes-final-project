@@ -40,7 +40,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
 #define DEBUG
-#undef DEBUG // Uncomment to enable led running flashing
+#undef DEBUG // Comment to enable led running flashing
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
