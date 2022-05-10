@@ -172,6 +172,10 @@ MORSE X[] = {DASH, DOT, DOT, DASH, MORSE_NONE};
 MORSE Y[] = {DASH, DOT, DASH, DASH, MORSE_NONE};
 MORSE Z[] = {DASH, DASH, DOT, DOT, MORSE_NONE};
 
+int userStreak =0;
+int userScore  =0;
+int problemsDone = 0;
+
 MORSE *letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
 MORSE ledBuffer = DOT;
 
@@ -298,7 +302,7 @@ void gameProblem()
 
   // Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
-
+  problemsDone++;
   if (status == osErrorTimeout)
   {
     chosenChoice = -1;
@@ -307,6 +311,15 @@ void gameProblem()
   {
     // Handle button press
     chosenChoice = (int)buttonBuffer - 1;
+    if(chosenChoice == correctChoice)
+    {
+        userStreak++;
+        userScore++;
+    }
+    else
+    {
+        userStreak = 0;
+    }
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
   gameState = END;
