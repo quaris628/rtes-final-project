@@ -1228,8 +1228,10 @@ void displayHandler(void *argument)
   /* Infinite loop */
   for(;;)
   {
-    int PAD = 5;
-    int SQUARE_SIZE = 15;
+    int PAD = 10;
+    int SQUARE_SIZE = 30;
+    int CHAR_WIDTH = 5;
+    int CHAR_HEIGHT = 5;
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
     if (gameState == MAIN) {
       // TODO Display in Main game state
@@ -1249,12 +1251,18 @@ void displayHandler(void *argument)
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
         BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
 
-        // unsure if the type is right for this line to work?
+        // letter is ascii code for A plus its integer offset
         char letter = choices[i] + 'A';
         
-        // display text of corresponding letter option
-        BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-        BSP_LCD_DisplayChar(PAD * 2 + SQUARE_SIZE, y, letter);
+        // display text of corresponding letter option on top of colored square
+        if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW) {
+          BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
+        } else {
+          BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
+        }
+        int charX = PAD + (SQUARE_SIZE - CHAR_WIDTH) / 2;
+        int charY = y + (SQUARE_SIZE - CHAR_HEIGHT) / 2;
+        BSP_LCD_DisplayChar(charX, charY, letter);
       }
 
     } else if (gameState == END) {
@@ -1264,7 +1272,7 @@ void displayHandler(void *argument)
         // Display answer was correct
         u_int8_t * correctMsg = "Correct!";
         BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-        BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, correctMsg, LEFT_MODE);
+        BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, y, correctMsg, LEFT_MODE);
 
         // Prompt play-again
         int X = 50;
@@ -1284,7 +1292,7 @@ void displayHandler(void *argument)
         // Display answer was incorrect
         BSP_LCD_SetTextColor(LCD_COLOR_RED);
         u_int8_t * incorrectChar = "X";
-        BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, incorrectChar, LEFT_MODE);
+        BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, y, incorrectChar, LEFT_MODE);
       } 
     }
     osSemaphoreRelease(displaySemEMPTYHandle);
