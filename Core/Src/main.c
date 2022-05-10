@@ -39,7 +39,8 @@
 
 /* Private macro -------------------------------------------------------------*/
 /* USER CODE BEGIN PM */
-
+#define DEBUG
+#undef DEBUG // Uncomment to enable led running flashing
 /* USER CODE END PM */
 
 /* Private variables ---------------------------------------------------------*/
@@ -87,6 +88,12 @@ const osThreadAttr_t buttonTask_attributes = {
 osThreadId_t ledTaskHandle;
 const osThreadAttr_t ledTask_attributes = {
     .name = "ledTask",
+    .priority = (osPriority_t)osPriorityLow,
+    .stack_size = 128 * 4};
+/* Definitions for runIndicate */
+osThreadId_t runIndicateHandle;
+const osThreadAttr_t runIndicate_attributes = {
+    .name = "runIndicate",
     .priority = (osPriority_t)osPriorityLow,
     .stack_size = 128 * 4};
 /* Definitions for problemTimeout */
@@ -204,6 +211,7 @@ void gameHandler(void *argument);
 void displayHandler(void *argument);
 void buttonHandler(void *argument);
 void ledHandler(void *argument);
+void runIndicateHandler(void *argument);
 void problemTimeoutCallback(void *argument);
 void dotCallback(void *argument);
 void dashCallback(void *argument);
@@ -454,6 +462,9 @@ int main(void)
 
   /* creation of ledTask */
   ledTaskHandle = osThreadNew(ledHandler, NULL, &ledTask_attributes);
+
+  /* creation of runIndicate */
+  runIndicateHandle = osThreadNew(runIndicateHandler, NULL, &runIndicate_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */
@@ -1409,6 +1420,27 @@ void ledHandler(void *argument)
     osSemaphoreRelease(ledSEMEmptyHandle);
   }
   /* USER CODE END ledHandler */
+}
+
+/* USER CODE BEGIN Header_runIndicateHandler */
+/**
+ * @brief Function implementing the runIndicate thread.
+ * @param argument: Not used
+ * @retval None
+ */
+/* USER CODE END Header_runIndicateHandler */
+void runIndicateHandler(void *argument)
+{
+  /* USER CODE BEGIN runIndicateHandler */
+#ifdef DEBUG
+  /* Infinite loop */
+  for (;;)
+  {
+    HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
+    osDelay(250);
+  }
+#endif
+  /* USER CODE END runIndicateHandler */
 }
 
 /* problemTimeoutCallback function */
