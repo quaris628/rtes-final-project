@@ -1,21 +1,21 @@
 /* USER CODE BEGIN Header */
 /**
-  ******************************************************************************
-  * @file           : main.c
-  * @brief          : Main program body
-  ******************************************************************************
-  * @attention
-  *
-  * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
-  * All rights reserved.</center></h2>
-  *
-  * This software component is licensed by ST under Ultimate Liberty license
-  * SLA0044, the "License"; You may not use this file except in compliance with
-  * the License. You may obtain a copy of the License at:
-  *                             www.st.com/SLA0044
-  *
-  ******************************************************************************
-  */
+ ******************************************************************************
+ * @file           : main.c
+ * @brief          : Main program body
+ ******************************************************************************
+ * @attention
+ *
+ * <h2><center>&copy; Copyright (c) 2022 STMicroelectronics.
+ * All rights reserved.</center></h2>
+ *
+ * This software component is licensed by ST under Ultimate Liberty license
+ * SLA0044, the "License"; You may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at:
+ *                             www.st.com/SLA0044
+ *
+ ******************************************************************************
+ */
 /* USER CODE END Header */
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
@@ -68,120 +68,104 @@ SRAM_HandleTypeDef hsram2;
 /* Definitions for gameTask */
 osThreadId_t gameTaskHandle;
 const osThreadAttr_t gameTask_attributes = {
-  .name = "gameTask",
-  .priority = (osPriority_t) osPriorityNormal,
-  .stack_size = 128 * 4
-};
+    .name = "gameTask",
+    .priority = (osPriority_t)osPriorityNormal,
+    .stack_size = 128 * 4};
 /* Definitions for displayTask */
 osThreadId_t displayTaskHandle;
 const osThreadAttr_t displayTask_attributes = {
-  .name = "displayTask",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 128 * 4
-};
+    .name = "displayTask",
+    .priority = (osPriority_t)osPriorityLow,
+    .stack_size = 128 * 4};
 /* Definitions for buttonTask */
 osThreadId_t buttonTaskHandle;
 const osThreadAttr_t buttonTask_attributes = {
-  .name = "buttonTask",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 128 * 4
-};
+    .name = "buttonTask",
+    .priority = (osPriority_t)osPriorityLow,
+    .stack_size = 128 * 4};
 /* Definitions for ledTask */
 osThreadId_t ledTaskHandle;
 const osThreadAttr_t ledTask_attributes = {
-  .name = "ledTask",
-  .priority = (osPriority_t) osPriorityLow,
-  .stack_size = 128 * 4
-};
+    .name = "ledTask",
+    .priority = (osPriority_t)osPriorityLow,
+    .stack_size = 128 * 4};
 /* Definitions for problemTimeout */
 osTimerId_t problemTimeoutHandle;
 const osTimerAttr_t problemTimeout_attributes = {
-  .name = "problemTimeout"
-};
+    .name = "problemTimeout"};
 /* Definitions for dotTimer */
 osTimerId_t dotTimerHandle;
 const osTimerAttr_t dotTimer_attributes = {
-  .name = "dotTimer"
-};
+    .name = "dotTimer"};
 /* Definitions for dashTimer */
 osTimerId_t dashTimerHandle;
 const osTimerAttr_t dashTimer_attributes = {
-  .name = "dashTimer"
-};
+    .name = "dashTimer"};
 /* Definitions for displayMutex */
 osMutexId_t displayMutexHandle;
 const osMutexAttr_t displayMutex_attributes = {
-  .name = "displayMutex"
-};
+    .name = "displayMutex"};
 /* Definitions for ledMutex */
 osMutexId_t ledMutexHandle;
 const osMutexAttr_t ledMutex_attributes = {
-  .name = "ledMutex"
-};
+    .name = "ledMutex"};
 /* Definitions for buttonMutex */
 osMutexId_t buttonMutexHandle;
 const osMutexAttr_t buttonMutex_attributes = {
-  .name = "buttonMutex"
-};
+    .name = "buttonMutex"};
 /* Definitions for displaySemEMPTY */
 osSemaphoreId_t displaySemEMPTYHandle;
 const osSemaphoreAttr_t displaySemEMPTY_attributes = {
-  .name = "displaySemEMPTY"
-};
+    .name = "displaySemEMPTY"};
 /* Definitions for displaySemFULL */
 osSemaphoreId_t displaySemFULLHandle;
 const osSemaphoreAttr_t displaySemFULL_attributes = {
-  .name = "displaySemFULL"
-};
+    .name = "displaySemFULL"};
 /* Definitions for buttonSemFULL */
 osSemaphoreId_t buttonSemFULLHandle;
 const osSemaphoreAttr_t buttonSemFULL_attributes = {
-  .name = "buttonSemFULL"
-};
+    .name = "buttonSemFULL"};
 /* Definitions for buttonSemEMPTY */
 osSemaphoreId_t buttonSemEMPTYHandle;
 const osSemaphoreAttr_t buttonSemEMPTY_attributes = {
-  .name = "buttonSemEMPTY"
-};
+    .name = "buttonSemEMPTY"};
 /* Definitions for ledSemFULL */
 osSemaphoreId_t ledSemFULLHandle;
 const osSemaphoreAttr_t ledSemFULL_attributes = {
-  .name = "ledSemFULL"
-};
+    .name = "ledSemFULL"};
 /* Definitions for ledSEMEmpty */
 osSemaphoreId_t ledSEMEmptyHandle;
 const osSemaphoreAttr_t ledSEMEmpty_attributes = {
-  .name = "ledSEMEmpty"
-};
+    .name = "ledSEMEmpty"};
 /* USER CODE BEGIN PV */
-MORSE A[] = { DOT, DASH, MORSE_NONE };
-MORSE B[] = { DASH, DOT, DOT, DOT, MORSE_NONE };
-MORSE C[] = { DASH, DOT, DASH, DOT, MORSE_NONE }; 
-MORSE D[] = { DASH, DOT, DOT, MORSE_NONE };
-MORSE E[] = { DOT, MORSE_NONE };
-MORSE F[] = { DOT, DOT, DASH, DOT, MORSE_NONE };
-MORSE G[] = { DASH, DASH, DOT, MORSE_NONE };
-MORSE H[] = { DOT, DOT, DOT, DOT, MORSE_NONE };
-MORSE I[] = { DOT, DOT, MORSE_NONE };
-MORSE J[] = { DOT, DASH, DASH, DASH, MORSE_NONE };
-MORSE K[] = { DASH, DOT, DASH, MORSE_NONE };
-MORSE L[] = { DOT, DASH, DOT, DOT, MORSE_NONE };
-MORSE M[] = { DASH, DASH, MORSE_NONE };
-MORSE N[] = { DASH, DOT, MORSE_NONE };
-MORSE O[] = { DASH, DASH, DASH, MORSE_NONE };
-MORSE P[] = { DOT, DASH, DASH, DOT, MORSE_NONE };
-MORSE Q[] = { DASH, DASH, DOT, DASH, MORSE_NONE };
-MORSE R[] = { DOT, DASH, DOT, MORSE_NONE };
-MORSE S[] = { DOT, DOT, DOT, MORSE_NONE };
-MORSE T[] = { DASH, MORSE_NONE };
-MORSE U[] = { DOT, DOT, DASH, MORSE_NONE };
-MORSE V[] = { DOT, DOT, DOT, DASH, MORSE_NONE };
-MORSE W[] = { DOT, DASH, DASH, MORSE_NONE };
-MORSE X[] = { DASH, DOT, DOT, DASH, MORSE_NONE };
-MORSE Y[] = { DASH, DOT, DASH, DASH, MORSE_NONE };
-MORSE Z[] = { DASH, DASH, DOT, DOT, MORSE_NONE };
+MORSE A[] = {DOT, DASH, MORSE_NONE};
+MORSE B[] = {DASH, DOT, DOT, DOT, MORSE_NONE};
+MORSE C[] = {DASH, DOT, DASH, DOT, MORSE_NONE};
+MORSE D[] = {DASH, DOT, DOT, MORSE_NONE};
+MORSE E[] = {DOT, MORSE_NONE};
+MORSE F[] = {DOT, DOT, DASH, DOT, MORSE_NONE};
+MORSE G[] = {DASH, DASH, DOT, MORSE_NONE};
+MORSE H[] = {DOT, DOT, DOT, DOT, MORSE_NONE};
+MORSE I[] = {DOT, DOT, MORSE_NONE};
+MORSE J[] = {DOT, DASH, DASH, DASH, MORSE_NONE};
+MORSE K[] = {DASH, DOT, DASH, MORSE_NONE};
+MORSE L[] = {DOT, DASH, DOT, DOT, MORSE_NONE};
+MORSE M[] = {DASH, DASH, MORSE_NONE};
+MORSE N[] = {DASH, DOT, MORSE_NONE};
+MORSE O[] = {DASH, DASH, DASH, MORSE_NONE};
+MORSE P[] = {DOT, DASH, DASH, DOT, MORSE_NONE};
+MORSE Q[] = {DASH, DASH, DOT, DASH, MORSE_NONE};
+MORSE R[] = {DOT, DASH, DOT, MORSE_NONE};
+MORSE S[] = {DOT, DOT, DOT, MORSE_NONE};
+MORSE T[] = {DASH, MORSE_NONE};
+MORSE U[] = {DOT, DOT, DASH, MORSE_NONE};
+MORSE V[] = {DOT, DOT, DOT, DASH, MORSE_NONE};
+MORSE W[] = {DOT, DASH, DASH, MORSE_NONE};
+MORSE X[] = {DASH, DOT, DOT, DASH, MORSE_NONE};
+MORSE Y[] = {DASH, DOT, DASH, DASH, MORSE_NONE};
+MORSE Z[] = {DASH, DASH, DOT, DOT, MORSE_NONE};
 
-MORSE* letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
+MORSE *letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
 MORSE ledBuffer = DOT;
 
 GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
@@ -196,6 +180,9 @@ int correctChoice = -1;
 int chosenChoice = -1;
 
 uint16_t BUTTON_COLORS[] = {LCD_COLOR_BLUE, LCD_COLOR_RED, LCD_COLOR_YELLOW, LCD_COLOR_GREEN};
+
+// Signaling definitions
+static TaskHandle_t ledTaskNotify = NULL;
 
 /* USER CODE END PV */
 
@@ -246,29 +233,32 @@ void TM_RNG_DeInit(void)
 
 uint32_t TM_RNG_Get(void)
 {
-  while (!(RNG->SR & (RNG_SR_DRDY)));
+  while (!(RNG->SR & (RNG_SR_DRDY)))
+    ;
   return RNG->DR;
 }
 
-void gameMain() {
+void gameMain()
+{
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-  //TODO: Add main menu text to display buffer
+  // TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-
-  //Process button press
+  // Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
-  //TODO: Handle button press
+  // TODO: Handle button press
   gameState = PROBLEM_GENERATION;
 
   osSemaphoreRelease(buttonSemEMPTYHandle);
 }
 
-void gameProblemGeneration() {
+void gameProblemGeneration()
+{
   // generate random problem
   int allLetters[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-      16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
-  for (int i = 0; i < 4; i++) {
+                      16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+  for (int i = 0; i < 4; i++)
+  {
     int randI = i + TM_RNG_Get() % (26 - i);
     int temp = allLetters[i];
     allLetters[i] = allLetters[randI];
@@ -282,26 +272,31 @@ void gameProblemGeneration() {
   gameState = PROBLEM;
 }
 
-void gameProblem() {
-  //Lock button press and display problem
+void gameProblem()
+{
+  // Lock button press and display problem
   osSemaphoreAcquire(displaySemEMPTYHandle, osWaitForever);
-  //int letterNum = TM_RNG_Get() % 26;
-  
-  //TODO: Add main menu text to display buffer
+  // int letterNum = TM_RNG_Get() % 26;
+
+  // TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-  for (int i = 0; letters[choices[correctChoice]][i] != MORSE_NONE; i++) {
+  for (int i = 0; letters[choices[correctChoice]][i] != MORSE_NONE; i++)
+  {
     osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
     ledBuffer = letters[choices[correctChoice]][i];
     osSemaphoreRelease(ledSemFULLHandle);
   }
 
-  //Get next button press
+  // Get next button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
-  if(status == osErrorTimeout) {
+  if (status == osErrorTimeout)
+  {
     chosenChoice = -1;
-  } else {
+  }
+  else
+  {
     // Handle button press
     chosenChoice = (int)buttonBuffer - 1;
     osSemaphoreRelease(buttonSemEMPTYHandle);
@@ -309,24 +304,31 @@ void gameProblem() {
   gameState = END;
 }
 
-void gameEnd() {
+void gameEnd()
+{
   // display "would you like to play again?"
   osSemaphoreAcquire(displaySemEMPTYHandle, 0);
   osSemaphoreRelease(displaySemFULLHandle);
-  
+
   // get button press
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
-  if(status == osErrorTimeout) {
+  if (status == osErrorTimeout)
+  {
     // if timed out, don't play again, go to main menu
     gameState = MAIN;
-  } else {
+  }
+  else
+  {
     // depending on which button was pressed
-    if((int)buttonBuffer == 1) {
+    if ((int)buttonBuffer == 1)
+    {
       // if said yes, play again
       // TODO change to generate problem state
       gameState = PROBLEM_GENERATION;
-    } else {
+    }
+    else
+    {
       // if said no, don't play again
       gameState = MAIN;
     }
@@ -336,9 +338,9 @@ void gameEnd() {
 /* USER CODE END 0 */
 
 /**
-  * @brief  The application entry point.
-  * @retval int
-  */
+ * @brief  The application entry point.
+ * @retval int
+ */
 int main(void)
 {
   /* USER CODE BEGIN 1 */
@@ -378,7 +380,7 @@ int main(void)
   TM_RNG_Init();
   BSP_LCD_Init();
   BSP_LCD_Clear(LCD_COLOR_WHITE);
-  //BSP_LCD_Clear(LCD_COLOR_WHITE);
+  // BSP_LCD_Clear(LCD_COLOR_WHITE);
   /* USER CODE END 2 */
 
   /* Init scheduler */
@@ -473,9 +475,9 @@ int main(void)
 }
 
 /**
-  * @brief System Clock Configuration
-  * @retval None
-  */
+ * @brief System Clock Configuration
+ * @retval None
+ */
 void SystemClock_Config(void)
 {
   RCC_OscInitTypeDef RCC_OscInitStruct = {0};
@@ -483,13 +485,13 @@ void SystemClock_Config(void)
   RCC_PeriphCLKInitTypeDef PeriphClkInitStruct = {0};
 
   /** Configure the main internal regulator output voltage
-  */
+   */
   __HAL_RCC_PWR_CLK_ENABLE();
   __HAL_PWR_VOLTAGESCALING_CONFIG(PWR_REGULATOR_VOLTAGE_SCALE1);
   /** Initializes the RCC Oscillators according to the specified parameters
-  * in the RCC_OscInitTypeDef structure.
-  */
-  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI|RCC_OSCILLATORTYPE_HSE;
+   * in the RCC_OscInitTypeDef structure.
+   */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSI | RCC_OSCILLATORTYPE_HSE;
   RCC_OscInitStruct.HSEState = RCC_HSE_BYPASS;
   RCC_OscInitStruct.HSIState = RCC_HSI_ON;
   RCC_OscInitStruct.HSICalibrationValue = RCC_HSICALIBRATION_DEFAULT;
@@ -505,9 +507,8 @@ void SystemClock_Config(void)
     Error_Handler();
   }
   /** Initializes the CPU, AHB and APB buses clocks
-  */
-  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
-                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+   */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK | RCC_CLOCKTYPE_SYSCLK | RCC_CLOCKTYPE_PCLK1 | RCC_CLOCKTYPE_PCLK2;
   RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_HSI;
   RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
   RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV1;
@@ -517,8 +518,7 @@ void SystemClock_Config(void)
   {
     Error_Handler();
   }
-  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S_APB1|RCC_PERIPHCLK_DFSDM1
-                              |RCC_PERIPHCLK_CLK48|RCC_PERIPHCLK_FMPI2C1;
+  PeriphClkInitStruct.PeriphClockSelection = RCC_PERIPHCLK_I2S_APB1 | RCC_PERIPHCLK_DFSDM1 | RCC_PERIPHCLK_CLK48 | RCC_PERIPHCLK_FMPI2C1;
   PeriphClkInitStruct.PLLI2S.PLLI2SN = 50;
   PeriphClkInitStruct.PLLI2S.PLLI2SM = 12;
   PeriphClkInitStruct.PLLI2S.PLLI2SR = 2;
@@ -535,10 +535,10 @@ void SystemClock_Config(void)
 }
 
 /**
-  * @brief ADC1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief ADC1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_ADC1_Init(void)
 {
 
@@ -552,7 +552,7 @@ static void MX_ADC1_Init(void)
 
   /* USER CODE END ADC1_Init 1 */
   /** Configure the global features of the ADC (Clock, Resolution, Data Alignment and number of conversion)
-  */
+   */
   hadc1.Instance = ADC1;
   hadc1.Init.ClockPrescaler = ADC_CLOCK_SYNC_PCLK_DIV2;
   hadc1.Init.Resolution = ADC_RESOLUTION_12B;
@@ -570,7 +570,7 @@ static void MX_ADC1_Init(void)
     Error_Handler();
   }
   /** Configure for the selected ADC regular channel its corresponding rank in the sequencer and its sample time.
-  */
+   */
   sConfig.Channel = ADC_CHANNEL_10;
   sConfig.Rank = 1;
   sConfig.SamplingTime = ADC_SAMPLETIME_3CYCLES;
@@ -581,14 +581,13 @@ static void MX_ADC1_Init(void)
   /* USER CODE BEGIN ADC1_Init 2 */
 
   /* USER CODE END ADC1_Init 2 */
-
 }
 
 /**
-  * @brief DAC Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief DAC Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_DAC_Init(void)
 {
 
@@ -602,14 +601,14 @@ static void MX_DAC_Init(void)
 
   /* USER CODE END DAC_Init 1 */
   /** DAC Initialization
-  */
+   */
   hdac.Instance = DAC;
   if (HAL_DAC_Init(&hdac) != HAL_OK)
   {
     Error_Handler();
   }
   /** DAC channel OUT1 config
-  */
+   */
   sConfig.DAC_Trigger = DAC_TRIGGER_NONE;
   sConfig.DAC_OutputBuffer = DAC_OUTPUTBUFFER_ENABLE;
   if (HAL_DAC_ConfigChannel(&hdac, &sConfig, DAC_CHANNEL_1) != HAL_OK)
@@ -619,14 +618,13 @@ static void MX_DAC_Init(void)
   /* USER CODE BEGIN DAC_Init 2 */
 
   /* USER CODE END DAC_Init 2 */
-
 }
 
 /**
-  * @brief DFSDM1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief DFSDM1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_DFSDM1_Init(void)
 {
 
@@ -657,14 +655,13 @@ static void MX_DFSDM1_Init(void)
   /* USER CODE BEGIN DFSDM1_Init 2 */
 
   /* USER CODE END DFSDM1_Init 2 */
-
 }
 
 /**
-  * @brief DFSDM2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief DFSDM2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_DFSDM2_Init(void)
 {
 
@@ -712,14 +709,13 @@ static void MX_DFSDM2_Init(void)
   /* USER CODE BEGIN DFSDM2_Init 2 */
 
   /* USER CODE END DFSDM2_Init 2 */
-
 }
 
 /**
-  * @brief FMPI2C1 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief FMPI2C1 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_FMPI2C1_Init(void)
 {
 
@@ -744,7 +740,7 @@ static void MX_FMPI2C1_Init(void)
     Error_Handler();
   }
   /** Configure Analogue filter
-  */
+   */
   if (HAL_FMPI2CEx_ConfigAnalogFilter(&hfmpi2c1, FMPI2C_ANALOGFILTER_ENABLE) != HAL_OK)
   {
     Error_Handler();
@@ -752,14 +748,13 @@ static void MX_FMPI2C1_Init(void)
   /* USER CODE BEGIN FMPI2C1_Init 2 */
 
   /* USER CODE END FMPI2C1_Init 2 */
-
 }
 
 /**
-  * @brief I2C2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2C2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2C2_Init(void)
 {
 
@@ -786,14 +781,13 @@ static void MX_I2C2_Init(void)
   /* USER CODE BEGIN I2C2_Init 2 */
 
   /* USER CODE END I2C2_Init 2 */
-
 }
 
 /**
-  * @brief I2S2 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief I2S2 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_I2S2_Init(void)
 {
 
@@ -820,14 +814,13 @@ static void MX_I2S2_Init(void)
   /* USER CODE BEGIN I2S2_Init 2 */
 
   /* USER CODE END I2S2_Init 2 */
-
 }
 
 /**
-  * @brief QUADSPI Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief QUADSPI Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_QUADSPI_Init(void)
 {
 
@@ -855,14 +848,13 @@ static void MX_QUADSPI_Init(void)
   /* USER CODE BEGIN QUADSPI_Init 2 */
 
   /* USER CODE END QUADSPI_Init 2 */
-
 }
 
 /**
-  * @brief UART10 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief UART10 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_UART10_Init(void)
 {
 
@@ -888,14 +880,13 @@ static void MX_UART10_Init(void)
   /* USER CODE BEGIN UART10_Init 2 */
 
   /* USER CODE END UART10_Init 2 */
-
 }
 
 /**
-  * @brief USART6 Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief USART6 Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_USART6_UART_Init(void)
 {
 
@@ -921,14 +912,13 @@ static void MX_USART6_UART_Init(void)
   /* USER CODE BEGIN USART6_Init 2 */
 
   /* USER CODE END USART6_Init 2 */
-
 }
 
 /**
-  * @brief GPIO Initialization Function
-  * @param None
-  * @retval None
-  */
+ * @brief GPIO Initialization Function
+ * @param None
+ * @retval None
+ */
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
@@ -944,19 +934,19 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOD_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOE, GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15, GPIO_PIN_RESET);
 
   /*Configure GPIO pin Output Level */
   HAL_GPIO_WritePin(GPIOG, GPIO_PIN_8, GPIO_PIN_RESET);
 
   /*Configure GPIO pins : PE3 PE4 PE5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_3|GPIO_PIN_4|GPIO_PIN_5;
+  GPIO_InitStruct.Pin = GPIO_PIN_3 | GPIO_PIN_4 | GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -971,7 +961,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOE, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PF6 PF7 PF10 */
-  GPIO_InitStruct.Pin = GPIO_PIN_6|GPIO_PIN_7|GPIO_PIN_10;
+  GPIO_InitStruct.Pin = GPIO_PIN_6 | GPIO_PIN_7 | GPIO_PIN_10;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOF, &GPIO_InitStruct);
@@ -1026,7 +1016,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB13 PB14 PB15 */
-  GPIO_InitStruct.Pin = GPIO_PIN_13|GPIO_PIN_14|GPIO_PIN_15;
+  GPIO_InitStruct.Pin = GPIO_PIN_13 | GPIO_PIN_14 | GPIO_PIN_15;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
@@ -1041,8 +1031,7 @@ static void MX_GPIO_Init(void)
 
   /*Configure GPIO pins : PC8 PC9 PC10 PC11
                            PC12 */
-  GPIO_InitStruct.Pin = GPIO_PIN_8|GPIO_PIN_9|GPIO_PIN_10|GPIO_PIN_11
-                          |GPIO_PIN_12;
+  GPIO_InitStruct.Pin = GPIO_PIN_8 | GPIO_PIN_9 | GPIO_PIN_10 | GPIO_PIN_11 | GPIO_PIN_12;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -1070,7 +1059,7 @@ static void MX_GPIO_Init(void)
   HAL_GPIO_Init(GPIOG, &GPIO_InitStruct);
 
   /*Configure GPIO pins : PB4 PB5 */
-  GPIO_InitStruct.Pin = GPIO_PIN_4|GPIO_PIN_5;
+  GPIO_InitStruct.Pin = GPIO_PIN_4 | GPIO_PIN_5;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
@@ -1084,7 +1073,6 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.Alternate = GPIO_AF2_TIM4;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-
 }
 
 /* FSMC initialization function */
@@ -1102,7 +1090,7 @@ static void MX_FSMC_Init(void)
   /* USER CODE END FSMC_Init 1 */
 
   /** Perform the SRAM1 memory initialization sequence
-  */
+   */
   hsram1.Instance = FSMC_NORSRAM_DEVICE;
   hsram1.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
   /* hsram1.Init */
@@ -1133,11 +1121,11 @@ static void MX_FSMC_Init(void)
 
   if (HAL_SRAM_Init(&hsram1, &Timing, NULL) != HAL_OK)
   {
-    Error_Handler( );
+    Error_Handler();
   }
 
   /** Perform the SRAM2 memory initialization sequence
-  */
+   */
   hsram2.Instance = FSMC_NORSRAM_DEVICE;
   hsram2.Extended = FSMC_NORSRAM_EXTENDED_DEVICE;
   /* hsram2.Init */
@@ -1168,7 +1156,7 @@ static void MX_FSMC_Init(void)
 
   if (HAL_SRAM_Init(&hsram2, &Timing, NULL) != HAL_OK)
   {
-    Error_Handler( );
+    Error_Handler();
   }
 
   /* USER CODE BEGIN FSMC_Init 2 */
@@ -1182,10 +1170,10 @@ static void MX_FSMC_Init(void)
 
 /* USER CODE BEGIN Header_gameHandler */
 /**
-  * @brief  Function implementing the gameTask thread.
-  * @param  argument: Not used
-  * @retval None
-  */
+ * @brief  Function implementing the gameTask thread.
+ * @param  argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_gameHandler */
 void gameHandler(void *argument)
 {
@@ -1193,7 +1181,7 @@ void gameHandler(void *argument)
   MX_USB_HOST_Init();
   /* USER CODE BEGIN 5 */
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     switch (gameState)
     {
@@ -1217,23 +1205,26 @@ void gameHandler(void *argument)
 
 /* USER CODE BEGIN Header_displayHandler */
 /**
-* @brief Function implementing the displayTask thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the displayTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_displayHandler */
 void displayHandler(void *argument)
 {
   /* USER CODE BEGIN displayHandler */
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     int PAD = 5;
     int SQUARE_SIZE = 15;
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
-    if (gameState == MAIN) {
+    if (gameState == MAIN)
+    {
       // TODO Display in Main game state
-    } else if (gameState == PROBLEM) {
+    }
+    else if (gameState == PROBLEM)
+    {
       // Display Problem
       // TODO test if:
       //   displays colored boxes on left
@@ -1243,7 +1234,8 @@ void displayHandler(void *argument)
       BSP_LCD_Clear(LCD_COLOR_WHITE);
 
       // Display user button choices
-      for (int i = 0; i < 4; i++) {
+      for (int i = 0; i < 4; i++)
+      {
         int y = PAD + (SQUARE_SIZE + PAD) * i;
         // display square of button color
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
@@ -1251,41 +1243,45 @@ void displayHandler(void *argument)
 
         // unsure if the type is right for this line to work?
         char letter = choices[i] + 'A';
-        
+
         // display text of corresponding letter option
         BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
         BSP_LCD_DisplayChar(PAD * 2 + SQUARE_SIZE, y, letter);
       }
-
-    } else if (gameState == END) {
+    }
+    else if (gameState == END)
+    {
       // TODO Display in End game state: Correct/Incorrect answer
       int y = PAD + (SQUARE_SIZE + PAD) * chosenChoice;
-      if (chosenChoice == correctChoice) {
+      if (chosenChoice == correctChoice)
+      {
         // Display answer was correct
-        u_int8_t * correctMsg = "Correct!";
+        u_int8_t *correctMsg = "Correct!";
         BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
         BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, correctMsg, LEFT_MODE);
 
         // Prompt play-again
         int X = 50;
         int Y = PAD * 5 + SQUARE_SIZE * 4;
-        u_int8_t * playAgainMsg = "Play Again?";
+        u_int8_t *playAgainMsg = "Play Again?";
         BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
         BSP_LCD_DisplayStringAt(X, Y, playAgainMsg, CENTER_MODE);
 
-        u_int8_t * yesMsg = "Yes";
+        u_int8_t *yesMsg = "Yes";
         BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
         BSP_LCD_DisplayStringAt(X - PAD, Y + PAD + SQUARE_SIZE, yesMsg, RIGHT_MODE);
-        
-        u_int8_t * noMsg = "No";
+
+        u_int8_t *noMsg = "No";
         BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
         BSP_LCD_DisplayStringAt(X + PAD, Y + PAD + SQUARE_SIZE, noMsg, LEFT_MODE);
-      } else {
+      }
+      else
+      {
         // Display answer was incorrect
         BSP_LCD_SetTextColor(LCD_COLOR_RED);
-        u_int8_t * incorrectChar = "X";
+        u_int8_t *incorrectChar = "X";
         BSP_LCD_DisplayStringAt(PAD * 3 + SQUARE_SIZE * 2, y, incorrectChar, LEFT_MODE);
-      } 
+      }
     }
     osSemaphoreRelease(displaySemEMPTYHandle);
     osDelay(1);
@@ -1295,67 +1291,72 @@ void displayHandler(void *argument)
 
 /* USER CODE BEGIN Header_buttonHandler */
 /**
-* @brief Function implementing the buttonTask thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the buttonTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_buttonHandler */
 void buttonHandler(void *argument)
 {
   /* USER CODE BEGIN buttonHandler */
   osStatus_t status;
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     status = osSemaphoreAcquire(buttonSemEMPTYHandle, osWaitForever);
     status = osMutexAcquire(buttonMutexHandle, osWaitForever);
     buttonBuffer = BUTTON_NONE;
     bool buttonPressed = false;
 
-    while(!buttonPressed) {
+    while (!buttonPressed)
+    {
 
       int button1Count = 0;
       int button2Count = 0;
       int button3Count = 0;
       int button4Count = 0;
 
-      for (int i = 0; i < 10; i++) {
-        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10))
+      for (int i = 0; i < 10; i++)
+      {
+        if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_10))
         {
           button1Count += 1;
         }
-        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_7))
+        if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_7))
         {
           button2Count += 1;
         }
-        if(HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6))
+        if (HAL_GPIO_ReadPin(GPIOF, GPIO_PIN_6))
         {
           button3Count += 1;
         }
-        if(HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_13))
+        if (HAL_GPIO_ReadPin(GPIOG, GPIO_PIN_13))
         {
           button4Count += 1;
         }
         osDelay(10);
       }
 
-      if(button1Count > 5) {
+      if (button1Count > 5)
+      {
         buttonBuffer = RED;
         buttonPressed = true;
       }
-      else if(button2Count > 5) {
+      else if (button2Count > 5)
+      {
         buttonBuffer = GREEN;
         buttonPressed = true;
       }
-      else if(button3Count > 5) {
+      else if (button3Count > 5)
+      {
         buttonBuffer = BLUE;
         buttonPressed = true;
       }
-      else if(button4Count > 5) {
+      else if (button4Count > 5)
+      {
         buttonBuffer = YELLOW;
         buttonPressed = true;
       }
-
     }
 
     status = osMutexRelease(buttonMutexHandle);
@@ -1366,16 +1367,18 @@ void buttonHandler(void *argument)
 
 /* USER CODE BEGIN Header_ledHandler */
 /**
-* @brief Function implementing the ledTask thread.
-* @param argument: Not used
-* @retval None
-*/
+ * @brief Function implementing the ledTask thread.
+ * @param argument: Not used
+ * @retval None
+ */
 /* USER CODE END Header_ledHandler */
 void ledHandler(void *argument)
 {
   /* USER CODE BEGIN ledHandler */
+
+  ledTaskNotify = xTaskGetCurrentTaskHandle();
   /* Infinite loop */
-  for(;;)
+  for (;;)
   {
     osSemaphoreAcquire(ledSemFULLHandle, osWaitForever);
     if (ledBuffer == DOT)
@@ -1388,9 +1391,22 @@ void ledHandler(void *argument)
       HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, SET);
       osTimerStart(dashTimerHandle, 1000);
     }
-    else{
-      osSemaphoreRelease(ledSEMEmptyHandle);
+
+    const TickType_t xMaxBlockTime = portMAX_DELAY;
+
+    /* Wait to be notified that the transmission is complete.  Note
+      the first parameter is pdTRUE, which has the effect of clearing
+      the task's notification value back to 0, making the notification
+      value act like a binary (rather than a counting) semaphore.  */
+    uint32_t ulNotificationValue = ulTaskNotifyTake(pdTRUE, xMaxBlockTime);
+
+    if (ulNotificationValue == 1)
+    {
+      HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, RESET);
+      osDelay(500);
     }
+
+    osSemaphoreRelease(ledSEMEmptyHandle);
   }
   /* USER CODE END ledHandler */
 }
@@ -1407,9 +1423,11 @@ void problemTimeoutCallback(void *argument)
 void dotCallback(void *argument)
 {
   /* USER CODE BEGIN dotCallback */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, RESET);
-  osDelay(500);
-  osSemaphoreRelease(ledSEMEmptyHandle);
+  // Notify LED
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  vTaskNotifyGiveFromISR(ledTaskNotify, &xHigherPriorityTaskWoken);
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   /* USER CODE END dotCallback */
 }
 
@@ -1417,26 +1435,29 @@ void dotCallback(void *argument)
 void dashCallback(void *argument)
 {
   /* USER CODE BEGIN dashCallback */
-  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_5, RESET);
-  osDelay(500);
-  osSemaphoreRelease(ledSEMEmptyHandle);
+  // Notify LED
+  BaseType_t xHigherPriorityTaskWoken = pdFALSE;
+
+  vTaskNotifyGiveFromISR(ledTaskNotify, &xHigherPriorityTaskWoken);
+  portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
   /* USER CODE END dashCallback */
 }
 
 /**
-  * @brief  Period elapsed callback in non blocking mode
-  * @note   This function is called  when TIM6 interrupt took place, inside
-  * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
-  * a global variable "uwTick" used as application time base.
-  * @param  htim : TIM handle
-  * @retval None
-  */
+ * @brief  Period elapsed callback in non blocking mode
+ * @note   This function is called  when TIM6 interrupt took place, inside
+ * HAL_TIM_IRQHandler(). It makes a direct call to HAL_IncTick() to increment
+ * a global variable "uwTick" used as application time base.
+ * @param  htim : TIM handle
+ * @retval None
+ */
 void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 {
   /* USER CODE BEGIN Callback 0 */
 
   /* USER CODE END Callback 0 */
-  if (htim->Instance == TIM6) {
+  if (htim->Instance == TIM6)
+  {
     HAL_IncTick();
   }
   /* USER CODE BEGIN Callback 1 */
@@ -1445,14 +1466,15 @@ void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *htim)
 }
 
 /**
-  * @brief  This function is executed in case of error occurrence.
-  * @retval None
-  */
+ * @brief  This function is executed in case of error occurrence.
+ * @retval None
+ */
 void Error_Handler(void)
 {
   /* USER CODE BEGIN Error_Handler_Debug */
   /* User can add his own implementation to report the HAL error return state */
-  for (;;) {
+  for (;;)
+  {
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
     HAL_Delay(200);
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_5);
@@ -1463,14 +1485,14 @@ void Error_Handler(void)
   /* USER CODE END Error_Handler_Debug */
 }
 
-#ifdef  USE_FULL_ASSERT
+#ifdef USE_FULL_ASSERT
 /**
-  * @brief  Reports the name of the source file and the source line number
-  *         where the assert_param error has occurred.
-  * @param  file: pointer to the source file name
-  * @param  line: assert_param error line source number
-  * @retval None
-  */
+ * @brief  Reports the name of the source file and the source line number
+ *         where the assert_param error has occurred.
+ * @param  file: pointer to the source file name
+ * @param  line: assert_param error line source number
+ * @retval None
+ */
 void assert_failed(uint8_t *file, uint32_t line)
 {
   /* USER CODE BEGIN 6 */
