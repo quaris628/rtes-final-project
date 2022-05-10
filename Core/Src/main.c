@@ -264,18 +264,17 @@ void gameMain() {
   // generate random problem
   // do this in MAIN and before PROBLEM so gameProblem() can
   //     be re-used for when the user gets the problem incorrect.
-  choices[0] = TM_RNG_Get() % 26;
-  for (int i = 1; i < 4; i++) {
-    // 2nd choice has 25 possibilities, 3rd choice has 24, etc
-    choices[i] = TM_RNG_Get() % (26 - i);
+  int allLetters = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25}
+  for (int i = 0; i < 4; i++) {
+    
+    int randI = i + TM_RNG_Get() % (26 - i);
+    int temp = allLetters[i];
+    allLetters[i] = allLetters[randI];
+    allLetters[randI] = temp;
+    choices[i] = allLetters[i];
     // shift choice up one index if a previous choice is <= to this choice
     // (to correct for the decreased maximum value that choices[i] can be and
     //    make all choices distinct)
-    for (int j = 0; j < i; j++) {
-      if (choices[j] <= choices[i]) {
-        choices[i]++;
-      }
-    }
   }
   correctChoice = TM_RNG_Get() % 4;
   chosenChoice = -1;
