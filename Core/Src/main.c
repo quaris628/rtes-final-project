@@ -26,6 +26,8 @@
 /* USER CODE BEGIN Includes */
 #include "stm32f413h_discovery_lcd.h"
 #include <stdbool.h>
+#include "game_dictionary.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -180,12 +182,13 @@ MORSE *letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, 
 MORSE ledBuffer = DOT;
 
 GAME_STATES gameState = MAIN; // shared memory, written to only by game thread
+PROBLEM_TYPES propblemState = WORD;
 
 BUTTONS buttonBuffer = BUTTON_NONE; // shared memory
 
 // shared memory about choices for a problem
 // written to only by game thread
-int choices[4];
+char choices[4][20];
 int correctChoice = -1;
 // written to only by button thread ?
 int chosenChoice = -1;
@@ -266,16 +269,44 @@ void gameMain()
 
 void gameProblemGeneration()
 {
-  // generate random problem
-  int allLetters[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-                      16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
-  for (int i = 0; i < 4; i++)
+  if (propblemState == CHARACTER)
   {
-    int randI = i + TM_RNG_Get() % (26 - i);
-    int temp = allLetters[i];
-    allLetters[i] = allLetters[randI];
-    allLetters[randI] = temp;
-    choices[i] = allLetters[i];
+    // generate random problem
+    int allLetters[] = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
+                        16, 17, 18, 19, 20, 21, 22, 23, 24, 25};
+    for (int i = 0; i < 4; i++)
+    {
+      int randI = i + TM_RNG_Get() % (26 - i);
+      int temp = allLetters[i];
+      allLetters[i] = allLetters[randI];
+      allLetters[randI] = temp;
+      sniprintf(&choices[i], sizeof(choices[i]), "%C", allLetters[i] + 'a');
+    }
+  }
+  else
+  {
+    int choiceWordIndex[4];
+    for (int i = 0; i < 4; i++)
+    {
+      int randI = TM_RNG_Get() % (numberOfCommonWords);
+
+      // Check for duplicates
+      for (int j = 0; j < i; j++)
+      {
+        if (choiceWordIndex[j] == randI)
+        {
+          randI = randI + 1;
+          j = 0;
+        }
+      }
+      choiceWordIndex[i] = randI;
+
+      // copy common word to choices
+      for (int j = 0; commonWords[i][j] != '\0' && j < 20; j++)
+      {
+        choices[i][j] = commonWords[i][j];
+      }
+    }
   }
   correctChoice = TM_RNG_Get() % 4;
   chosenChoice = -1;
@@ -293,11 +324,17 @@ void gameProblem()
   // TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
-  for (int i = 0; letters[choices[correctChoice]][i] != MORSE_NONE; i++)
+  for (int i = 0; choices[correctChoice][i] != '\0'; i++)
   {
-    osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
-    ledBuffer = letters[choices[correctChoice]][i];
-    osSemaphoreRelease(ledSemFULLHandle);
+    char currentLetter = choices[correctChoice][i];
+    MORSE *morseLetter = letters[currentLetter - 'a'];
+    for (int j = 0; morseLetter[j] != MORSE_NONE; j++)
+    {
+      osSemaphoreAcquire(ledSEMEmptyHandle, osWaitForever);
+      ledBuffer = morseLetter[j];
+      osSemaphoreRelease(ledSemFULLHandle);
+    }
+    osDelay(500);
   }
   // clear any extra button presses during led flashing
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 1);
@@ -1283,9 +1320,6 @@ void displayHandler(void *argument)
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
         BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
 
-        // letter is ascii code for A plus its integer offset
-        char letter = choices[i] + 'A';
-
         // display text of corresponding letter option on top of colored square
         if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN)
         {
@@ -1298,7 +1332,7 @@ void displayHandler(void *argument)
         int charX = PAD + (SQUARE_SIZE - CHAR_WIDTH) / 2;
         int charY = y + (SQUARE_SIZE - CHAR_HEIGHT) / 2;
         BSP_LCD_SetBackColor(BUTTON_COLORS[i]);
-        BSP_LCD_DisplayChar(charX, charY, letter);
+        BSP_LCD_DisplayStringAt(charX, charY, choices[i], LEFT_MODE);
       }
       BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
     }
