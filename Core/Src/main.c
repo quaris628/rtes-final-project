@@ -1457,9 +1457,15 @@ void runIndicateHandler(void *argument)
   for (;;)
   {
     HAL_GPIO_TogglePin(GPIOE, GPIO_PIN_3);
-    osDelay(250);
+    osDelay(1000);
+  }
+#else
+  for (;;)
+  {
+    osDelay(osWaitForever);
   }
 #endif
+
   /* USER CODE END runIndicateHandler */
 }
 
