@@ -268,7 +268,7 @@ void gameMain()
 
   // Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
-  if (buttonBuffer == BUTTON_COLORS[0])
+  if (buttonBuffer == BLUE)
   {
     propblemState = WORD;
   }
