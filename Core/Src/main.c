@@ -1316,11 +1316,16 @@ void displayHandler(void *argument)
       BSP_LCD_Clear(LCD_COLOR_WHITE);
       u_int8_t *welcomeMsg1 = "Welcome to the";
       u_int8_t *welcomeMsg2 = "Morse Code Tutor!";
-      u_int8_t *pressAnyButtonMsg = "Press any button";
+      u_int8_t *letterProbsMsg = "Letter Problems";
+      u_int8_t *wordProbsMsg = "Word Problems";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
       BSP_LCD_DisplayStringAt(0, 300, welcomeMsg1, CENTER_MODE);
       BSP_LCD_DisplayStringAt(0, 300 + CHAR_HEIGHT + PAD, welcomeMsg2, CENTER_MODE);
-      BSP_LCD_DisplayStringAt(0, 300 + 2 * (CHAR_HEIGHT + PAD), pressAnyButtonMsg, CENTER_MODE);
+      BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
+      BSP_LCD_DisplayStringAt(0, 300 + 2 * (CHAR_HEIGHT + PAD), letterProbsMsg, CENTER_MODE);
+      BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
+      BSP_LCD_DisplayStringAt(0, 300 + 3 * (CHAR_HEIGHT + PAD), wordProbsMsg, CENTER_MODE);
+      BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
     }
     else if (gameState == PROBLEM)
     {
@@ -1331,9 +1336,13 @@ void displayHandler(void *argument)
       for (int i = 0; i < 4; i++)
       {
         int y = PAD + (SQUARE_SIZE + PAD) * i;
-        // display square of button color
+        // display square/rect of button color
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
-        BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
+        if (propblemState == WORD) {
+          BSP_LCD_FillRect(PAD, y, SQUARE_SIZE + 20 * CHAR_WIDTH, SQUARE_SIZE);
+        } else {
+          BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
+        }
 
         // display text of corresponding letter option on top of colored square
         if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN)
