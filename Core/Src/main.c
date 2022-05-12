@@ -172,8 +172,8 @@ MORSE X[] = {DASH, DOT, DOT, DASH, MORSE_NONE};
 MORSE Y[] = {DASH, DOT, DASH, DASH, MORSE_NONE};
 MORSE Z[] = {DASH, DASH, DOT, DOT, MORSE_NONE};
 
-int userStreak =0;
-int userScore  =0;
+int userStreak = 0;
+int userScore  = 0;
 int problemsDone = 0;
 
 MORSE *letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
