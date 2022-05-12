@@ -1308,6 +1308,12 @@ void displayHandler(void *argument)
       int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       u_int8_t *correctMsg = "Correct!";
+      u_int8_t *scoreMsg = "Your score is: ";
+      u_int8_t *totalAttemptsMsg = "Total Attempts";
+      BSP_LCD_DisplayStringAt(400, 380, scoreMsg, RIGHT_MODE); //align with bottom left of screen
+      BSP_LCD_DisplayStringAt(400, 400, userScore, RIGHT_MODE); //just below previous string
+      BSP_LCD_DisplayStringAt(400, 420, totalAttemptsMsg, RIGHT_MODE); //just below previous string
+      BSP_LCD_DisplayStringAt(400, 440, problemsDone, RIGHT_MODE); //just below previous string
       if (chosenChoice != correctChoice)
       {
         // Display answer was incorrect
@@ -1315,6 +1321,7 @@ void displayHandler(void *argument)
         u_int8_t *incorrectChar = "X";
         BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, chosenY, incorrectChar, LEFT_MODE);
         correctMsg = "<-";
+
       }
       // Indicate correct answer
       BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
