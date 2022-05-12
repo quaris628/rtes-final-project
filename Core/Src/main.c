@@ -280,7 +280,7 @@ void gameProblemGeneration()
       int temp = allLetters[i];
       allLetters[i] = allLetters[randI];
       allLetters[randI] = temp;
-      sniprintf(&choices[i], sizeof(choices[i]), "%C", allLetters[i] + 'a');
+      sniprintf(&choices[i], sizeof(choices[i]), "%c", allLetters[i] + 'a');
     }
   }
   else
@@ -302,9 +302,9 @@ void gameProblemGeneration()
       choiceWordIndex[i] = randI;
 
       // copy common word to choices
-      for (int j = 0; commonWords[i][j] != '\0' && j < 20; j++)
+      for (int j = 0; commonWords[randI][j] != '\0' && j < 20; j++)
       {
-        choices[i][j] = commonWords[i][j];
+        choices[i][j] = commonWords[randI][j];
       }
     }
   }
