@@ -172,8 +172,8 @@ MORSE X[] = {DASH, DOT, DOT, DASH, MORSE_NONE};
 MORSE Y[] = {DASH, DOT, DASH, DASH, MORSE_NONE};
 MORSE Z[] = {DASH, DASH, DOT, DOT, MORSE_NONE};
 
-int userStreak =0;
-int userScore  =0;
+int userStreak = 0;
+int userScore = 0;
 int problemsDone = 0;
 
 MORSE *letters[] = {A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z};
@@ -299,9 +299,15 @@ void gameProblem()
     ledBuffer = letters[choices[correctChoice]][i];
     osSemaphoreRelease(ledSemFULLHandle);
   }
+  // clear any extra button presses during led flashing
+  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 1);
+  if (status != osErrorTimeout)
+  {
+    osSemaphoreRelease(buttonSemEMPTYHandle);
+  }
 
   // Get next button press
-  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
+  status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
   problemsDone++;
   if (status == osErrorTimeout)
   {
@@ -311,14 +317,14 @@ void gameProblem()
   {
     // Handle button press
     chosenChoice = (int)buttonBuffer - 1;
-    if(chosenChoice == correctChoice)
+    if (chosenChoice == correctChoice)
     {
-        userStreak++;
-        userScore++;
+      userStreak++;
+      userScore++;
     }
     else
     {
-        userStreak = 0;
+      userStreak = 0;
     }
     osSemaphoreRelease(buttonSemEMPTYHandle);
   }
@@ -331,8 +337,15 @@ void gameEnd()
   osSemaphoreAcquire(displaySemEMPTYHandle, 0);
   osSemaphoreRelease(displaySemFULLHandle);
 
+  // clear any extra button presses before diplay finished
+  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 1);
+  if (status != osErrorTimeout)
+  {
+    osSemaphoreRelease(buttonSemEMPTYHandle);
+  }
+
   // get button press
-  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
+  status = osSemaphoreAcquire(buttonSemFULLHandle, 10000);
 
   if (status == osErrorTimeout)
   {
@@ -342,7 +355,7 @@ void gameEnd()
   else
   {
     // depending on which button was pressed
-    if ((int)buttonBuffer == 1)
+    if (buttonBuffer == BLUE)
     {
       // if said yes, play again
       // TODO change to generate problem state
@@ -1245,17 +1258,20 @@ void displayHandler(void *argument)
     int CHAR_WIDTH = 5;
     int CHAR_HEIGHT = 5;
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
-    if (gameState == MAIN) {
+    if (gameState == MAIN)
+    {
       // Display in Main game state
       BSP_LCD_Clear(LCD_COLOR_WHITE);
-      u_int8_t * welcomeMsg1 = "Welcome to the";
-      u_int8_t * welcomeMsg2 = "Morse Code Tutor!";
-      u_int8_t * pressAnyButtonMsg = "Press any button";
+      u_int8_t *welcomeMsg1 = "Welcome to the";
+      u_int8_t *welcomeMsg2 = "Morse Code Tutor!";
+      u_int8_t *pressAnyButtonMsg = "Press any button";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
       BSP_LCD_DisplayStringAt(0, 300, welcomeMsg1, CENTER_MODE);
       BSP_LCD_DisplayStringAt(0, 300 + CHAR_HEIGHT + PAD, welcomeMsg2, CENTER_MODE);
       BSP_LCD_DisplayStringAt(0, 300 + 2 * (CHAR_HEIGHT + PAD), pressAnyButtonMsg, CENTER_MODE);
-    } else if (gameState == PROBLEM) {
+    }
+    else if (gameState == PROBLEM)
+    {
       // Clear LCD
       BSP_LCD_Clear(LCD_COLOR_WHITE);
 
@@ -1269,11 +1285,14 @@ void displayHandler(void *argument)
 
         // letter is ascii code for A plus its integer offset
         char letter = choices[i] + 'A';
-        
+
         // display text of corresponding letter option on top of colored square
-        if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN) {
+        if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN)
+        {
           BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
-        } else {
+        }
+        else
+        {
           BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
         }
         int charX = PAD + (SQUARE_SIZE - CHAR_WIDTH) / 2;
@@ -1282,16 +1301,18 @@ void displayHandler(void *argument)
         BSP_LCD_DisplayChar(charX, charY, letter);
       }
       BSP_LCD_SetBackColor(LCD_COLOR_WHITE);
-
-    } else if (gameState == END) {
+    }
+    else if (gameState == END)
+    {
       // Display in End game state: Correct/Incorrect answer
       int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
-      u_int8_t * correctMsg = "Correct!";
-      if (chosenChoice != correctChoice) {
+      u_int8_t *correctMsg = "Correct!";
+      if (chosenChoice != correctChoice)
+      {
         // Display answer was incorrect
         BSP_LCD_SetTextColor(LCD_COLOR_RED);
-        u_int8_t * incorrectChar = "X";
+        u_int8_t *incorrectChar = "X";
         BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, chosenY, incorrectChar, LEFT_MODE);
         correctMsg = "<-";
       }
@@ -1302,15 +1323,15 @@ void displayHandler(void *argument)
       // Prompt play-again
       int X = 50;
       int Y = PAD * 5 + SQUARE_SIZE * 4;
-      u_int8_t * playAgainMsg = "Play Again?";
+      u_int8_t *playAgainMsg = "Play Again?";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
       BSP_LCD_DisplayStringAt(0, Y, playAgainMsg, CENTER_MODE);
 
-      u_int8_t * yesMsg = "Yes";
+      u_int8_t *yesMsg = "Yes";
       BSP_LCD_SetTextColor(BUTTON_COLORS[0]);
       BSP_LCD_DisplayStringAt(-PAD / 2 - CHAR_WIDTH * 3, Y + PAD + CHAR_HEIGHT, yesMsg, CENTER_MODE);
-      
-      u_int8_t * noMsg = "No";
+
+      u_int8_t *noMsg = "No";
       BSP_LCD_SetTextColor(BUTTON_COLORS[1]);
       BSP_LCD_DisplayStringAt(PAD / 2, Y + PAD + CHAR_HEIGHT, noMsg, CENTER_MODE);
     }
