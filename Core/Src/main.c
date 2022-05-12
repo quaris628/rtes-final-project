@@ -1357,7 +1357,7 @@ void displayHandler(void *argument)
         {
           BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
         }
-        int charX = PAD + (RECT_WIDTH - CHAR_WIDTH) / 2;
+        int charX = PAD + (RECT_HEIGHT - CHAR_WIDTH) / 2;
         int charY = y + (RECT_HEIGHT - CHAR_HEIGHT) / 2;
         BSP_LCD_SetBackColor(BUTTON_COLORS[i]);
         BSP_LCD_DisplayStringAt(charX, charY, choices[i], LEFT_MODE);
