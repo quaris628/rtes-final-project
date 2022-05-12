@@ -295,7 +295,8 @@ void gameProblemGeneration()
       int temp = allLetters[i];
       allLetters[i] = allLetters[randI];
       allLetters[randI] = temp;
-      sniprintf(&choices[i], sizeof(choices[i]), "%c", allLetters[i] + 'a');
+      choices[i][0] = (char)allLetters[i] + 'a';
+      choices[i][1] = '\0';
     }
   }
   else
@@ -341,6 +342,7 @@ void gameProblem()
 
   for (int i = 0; choices[correctChoice][i] != '\0'; i++)
   {
+    osDelay(500);
     char currentLetter = choices[correctChoice][i];
     MORSE *morseLetter = letters[currentLetter - 'a'];
     for (int j = 0; morseLetter[j] != MORSE_NONE; j++)
@@ -349,7 +351,6 @@ void gameProblem()
       ledBuffer = morseLetter[j];
       osSemaphoreRelease(ledSemFULLHandle);
     }
-    osDelay(500);
   }
   // clear any extra button presses during led flashing
   osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 1);
@@ -1338,9 +1339,12 @@ void displayHandler(void *argument)
         int y = PAD + (SQUARE_SIZE + PAD) * i;
         // display square/rect of button color
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
-        if (propblemState == WORD) {
+        if (propblemState == WORD)
+        {
           BSP_LCD_FillRect(PAD, y, SQUARE_SIZE + 20 * CHAR_WIDTH, SQUARE_SIZE);
-        } else {
+        }
+        else
+        {
           BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
         }
 
