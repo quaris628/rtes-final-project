@@ -259,9 +259,24 @@ void gameMain()
   // TODO: Add main menu text to display buffer
   osSemaphoreRelease(displaySemFULLHandle);
 
+  // clear any extra button presses
+  osStatus_t status = osSemaphoreAcquire(buttonSemFULLHandle, 1);
+  if (status != osErrorTimeout)
+  {
+    osSemaphoreRelease(buttonSemEMPTYHandle);
+  }
+
   // Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
-  // TODO: Handle button press
+  if (buttonBuffer == BUTTON_COLORS[0])
+  {
+    propblemState = WORD;
+  }
+  else
+  {
+    propblemState = CHARACTER;
+  }
+
   gameState = PROBLEM_GENERATION;
 
   osSemaphoreRelease(buttonSemEMPTYHandle);
