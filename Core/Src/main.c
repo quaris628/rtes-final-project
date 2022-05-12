@@ -1307,9 +1307,16 @@ void displayHandler(void *argument)
   for (;;)
   {
     int PAD = 10;
-    int SQUARE_SIZE = 30;
     int CHAR_WIDTH = 5;
     int CHAR_HEIGHT = 5;
+    int RECT_HEIGHT = 30;
+    int RECT_WIDTH = RECT_HEIGHT;
+    if (propblemState == WORD)
+    {
+      // 20 is maximum number of characters in the words we're using
+      RECT_WIDTH = RECT_HEIGHT + 20 * CHAR_WIDTH;
+    }
+
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
     if (gameState == MAIN)
     {
@@ -1336,17 +1343,10 @@ void displayHandler(void *argument)
       // Display user button choices
       for (int i = 0; i < 4; i++)
       {
-        int y = PAD + (SQUARE_SIZE + PAD) * i;
+        int y = PAD + (RECT_HEIGHT + PAD) * i;
         // display square/rect of button color
         BSP_LCD_SetTextColor(BUTTON_COLORS[i]);
-        if (propblemState == WORD)
-        {
-          BSP_LCD_FillRect(PAD, y, SQUARE_SIZE + 20 * CHAR_WIDTH, SQUARE_SIZE);
-        }
-        else
-        {
-          BSP_LCD_FillRect(PAD, y, SQUARE_SIZE, SQUARE_SIZE);
-        }
+        BSP_LCD_FillRect(PAD, y, RECT_WIDTH, RECT_HEIGHT);
 
         // display text of corresponding letter option on top of colored square
         if (BUTTON_COLORS[i] == LCD_COLOR_YELLOW || BUTTON_COLORS[i] == LCD_COLOR_GREEN)
@@ -1357,8 +1357,8 @@ void displayHandler(void *argument)
         {
           BSP_LCD_SetTextColor(LCD_COLOR_WHITE);
         }
-        int charX = PAD + (SQUARE_SIZE - CHAR_WIDTH) / 2;
-        int charY = y + (SQUARE_SIZE - CHAR_HEIGHT) / 2;
+        int charX = PAD + (RECT_WIDTH - CHAR_WIDTH) / 2;
+        int charY = y + (RECT_HEIGHT - CHAR_HEIGHT) / 2;
         BSP_LCD_SetBackColor(BUTTON_COLORS[i]);
         BSP_LCD_DisplayStringAt(charX, charY, choices[i], LEFT_MODE);
       }
@@ -1367,24 +1367,24 @@ void displayHandler(void *argument)
     else if (gameState == END)
     {
       // Display in End game state: Correct/Incorrect answer
-      int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
-      int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
+      int chosenY = PAD + (RECT_HEIGHT + PAD) * chosenChoice + RECT_HEIGHT / 2 - CHAR_HEIGHT;
+      int correctY = PAD + (RECT_HEIGHT + PAD) * correctChoice + RECT_HEIGHT / 2 - CHAR_HEIGHT;
       u_int8_t *correctMsg = "Correct!";
       if (chosenChoice != correctChoice)
       {
         // Display answer was incorrect
         BSP_LCD_SetTextColor(LCD_COLOR_RED);
         u_int8_t *incorrectChar = "X";
-        BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, chosenY, incorrectChar, LEFT_MODE);
+        BSP_LCD_DisplayStringAt(PAD * 2 + RECT_WIDTH, chosenY, incorrectChar, LEFT_MODE);
         correctMsg = "<-";
       }
       // Indicate correct answer
       BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
-      BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, correctY, correctMsg, LEFT_MODE);
+      BSP_LCD_DisplayStringAt(PAD * 2 + RECT_WIDTH, correctY, correctMsg, LEFT_MODE);
 
       // Prompt play-again
       int X = 50;
-      int Y = PAD * 5 + SQUARE_SIZE * 4;
+      int Y = PAD * 5 + RECT_HEIGHT * 4;
       u_int8_t *playAgainMsg = "Play Again?";
       BSP_LCD_SetTextColor(LCD_COLOR_BLACK);
       BSP_LCD_DisplayStringAt(0, Y, playAgainMsg, CENTER_MODE);
