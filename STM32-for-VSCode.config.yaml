@@ -44,6 +44,7 @@ cxxFlags: []
 assemblyFlags: []
 linkerFlags: 
   - -specs=nano.specs
+  - -specs=nosys.specs
 
 
 # libraries to be included. The -l prefix to the library will be automatically added.

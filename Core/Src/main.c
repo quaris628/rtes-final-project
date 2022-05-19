@@ -26,6 +26,7 @@
 /* USER CODE BEGIN Includes */
 #include "stm32f413h_discovery_lcd.h"
 #include <stdbool.h>
+#include <math.h>
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -227,10 +228,36 @@ uint32_t TM_RNG_Get(void);
 void gameMain(void);
 void gameProblem(void);
 void gameEnd(void);
+void intToString(int, char *, int);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+void intToString(int number, char *stringPointer, int maxSize)
+{
+  int numberOfDigits;
+  if (number > 0)
+  {
+    numberOfDigits = (int)log10(number) + 1;
+  }
+  else
+  {
+    numberOfDigits = 1;
+  }
+
+  if (numberOfDigits >= maxSize)
+  {
+    numberOfDigits = maxSize - 1;
+    number = (int)pow(10, maxSize - 1) - 1;
+  }
+
+  for (int i = numberOfDigits; i > 0; --i, number /= 10)
+  {
+    stringPointer[i - 1] = (number % 10) + '0';
+  }
+  stringPointer[numberOfDigits] = '\0';
+}
+
 void TM_RNG_Init(void)
 {
   __HAL_RCC_RNG_CLK_ENABLE();
@@ -1308,29 +1335,18 @@ void displayHandler(void *argument)
       int chosenY = PAD + (SQUARE_SIZE + PAD) * chosenChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       int correctY = PAD + (SQUARE_SIZE + PAD) * correctChoice + SQUARE_SIZE / 2 - CHAR_HEIGHT;
       u_int8_t *correctMsg = "Correct!";
-      u_int8_t *scoreMsg = "Your score is: ";
-      u_int8_t *totalAttemptsMsg = "Total Attempts";
+      u_int8_t *scoreMsg = "Your score is:   ";
+      u_int8_t *totalAttemptsMsg = "Total Attempts:   ";
 
-      //convert userscore to char array
-      char userScoreMessage[log10(userScore)] + 1;
-      int userScoreCopy = userScore;
-      for(int i = log10(userScore) - 1; i >= 0; --i, userScoreCopy /= 10)
-      {
-        userScoreMessage[i] = (userScoreCopy % 10) + '0';
-      }
+      char userScoreMessage[4];
+      char problemsDoneMessage[4];
+      intToString(userScore, &userScoreMessage[0], 4);
+      intToString(problemsDone, &problemsDoneMessage[0], 4);
 
-      //convert problemsdone to char array
-      char problemsDoneMessage[log10(problemsDone)] + 1;
-      int problemsDoneCopy = problemsDone;
-      for(int i = log10(problemsDone) - 1; i >= 0; --i, problemsDoneCopy /= 10)
-      {
-        problemsDoneMessage[i] = (problemsDoneCopy % 10) + '0';
-      }
-
-      BSP_LCD_DisplayStringAt(400, 380, scoreMsg, RIGHT_MODE); //align with bottom left of screen
-      BSP_LCD_DisplayStringAt(400, 400, userScoreMessage, RIGHT_MODE); //just below previous string
-      BSP_LCD_DisplayStringAt(400, 420, totalAttemptsMsg, RIGHT_MODE); //just below previous string
-      BSP_LCD_DisplayStringAt(400, 440, problemsDoneMessage, RIGHT_MODE); //just below previous string
+      BSP_LCD_DisplayStringAt(20, 20, scoreMsg, RIGHT_MODE);            // align with bottom left of screen
+      BSP_LCD_DisplayStringAt(20, 20, userScoreMessage, RIGHT_MODE);    // just below previous string
+      BSP_LCD_DisplayStringAt(20, 30, totalAttemptsMsg, RIGHT_MODE);    // just below previous string
+      BSP_LCD_DisplayStringAt(20, 30, problemsDoneMessage, RIGHT_MODE); // just below previous string
       if (chosenChoice != correctChoice)
       {
         // Display answer was incorrect
@@ -1338,7 +1354,6 @@ void displayHandler(void *argument)
         u_int8_t *incorrectChar = "X";
         BSP_LCD_DisplayStringAt(PAD * 2 + SQUARE_SIZE, chosenY, incorrectChar, LEFT_MODE);
         correctMsg = "<-";
-
       }
       // Indicate correct answer
       BSP_LCD_SetTextColor(LCD_COLOR_GREEN);
