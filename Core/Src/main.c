@@ -295,7 +295,7 @@ void gameMain()
 
   // Process button press
   osSemaphoreAcquire(buttonSemFULLHandle, osWaitForever);
-  if (buttonBuffer == BLUE)
+  if (buttonBuffer == RED)
   {
     propblemState = WORD;
   }
@@ -1338,11 +1338,6 @@ void displayHandler(void *argument)
     int CHAR_HEIGHT = 5;
     int RECT_HEIGHT = 30;
     int RECT_WIDTH = RECT_HEIGHT;
-    if (propblemState == WORD)
-    {
-      // 20 is maximum number of characters in the words we're using
-      RECT_WIDTH = RECT_HEIGHT + 20 * CHAR_WIDTH;
-    }
 
     osSemaphoreAcquire(displaySemFULLHandle, osWaitForever);
     if (gameState == MAIN)
@@ -1366,6 +1361,15 @@ void displayHandler(void *argument)
     {
       // Clear LCD
       BSP_LCD_Clear(LCD_COLOR_WHITE);
+      if (propblemState == WORD)
+      {
+        // 20 is maximum number of characters in the words we're using
+        RECT_WIDTH = RECT_HEIGHT + 20 * CHAR_WIDTH;
+      }
+      else
+      {
+        RECT_WIDTH = RECT_HEIGHT;
+      }
 
       // Display user button choices
       for (int i = 0; i < 4; i++)
