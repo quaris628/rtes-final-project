@@ -1397,18 +1397,18 @@ void displayHandler(void *argument)
       int chosenY = PAD + (RECT_HEIGHT + PAD) * chosenChoice + RECT_HEIGHT / 2 - CHAR_HEIGHT;
       int correctY = PAD + (RECT_HEIGHT + PAD) * correctChoice + RECT_HEIGHT / 2 - CHAR_HEIGHT;
       u_int8_t *correctMsg = "Correct!";
-      u_int8_t *scoreMsg = "Your score is:   ";
-      u_int8_t *totalAttemptsMsg = "Total Attempts:   ";
+      u_int8_t *scoreMsg = "score:   ";
+      u_int8_t *totalAttemptsMsg = "Attempts:   ";
 
       char userScoreMessage[4];
       char problemsDoneMessage[4];
       intToString(userScore, &userScoreMessage[0], 4);
       intToString(problemsDone, &problemsDoneMessage[0], 4);
 
-      BSP_LCD_DisplayStringAt(20, 20, scoreMsg, RIGHT_MODE);            // align with bottom left of screen
-      BSP_LCD_DisplayStringAt(20, 20, userScoreMessage, RIGHT_MODE);    // just below previous string
-      BSP_LCD_DisplayStringAt(20, 30, totalAttemptsMsg, RIGHT_MODE);    // just below previous string
-      BSP_LCD_DisplayStringAt(20, 30, problemsDoneMessage, RIGHT_MODE); // just below previous string
+      BSP_LCD_DisplayStringAt(10, 210, scoreMsg, RIGHT_MODE);            // align with bottom left of screen
+      BSP_LCD_DisplayStringAt(10, 210, userScoreMessage, RIGHT_MODE);    // just below previous string
+      BSP_LCD_DisplayStringAt(10, 220, totalAttemptsMsg, RIGHT_MODE);    // just below previous string
+      BSP_LCD_DisplayStringAt(10, 220, problemsDoneMessage, RIGHT_MODE); // just below previous string
       if (chosenChoice != correctChoice)
       {
         // Display answer was incorrect
