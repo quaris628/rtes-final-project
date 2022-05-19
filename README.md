@@ -33,6 +33,9 @@ Use the stm32-for-vscode extension to build the project
  - Go to "STM32 for VSCode" ("ST" in box icon on left ribbon)
  - Select "Build" to compile the project
    (If there are any compilation errors, they will show up at this step)
+ - If you do not have the option to build it may prompt you to install the extenstion build tools
+   - If you are still having build issues you may need to delete the entries for cortex-debug.armToolchainPath and cortex-debug.openocdPath from .vscode/settings.json.
+  The extension will readd these to the correct path when building
  
  
 How to set up the discovery board to run the project:
