@@ -1310,10 +1310,27 @@ void displayHandler(void *argument)
       u_int8_t *correctMsg = "Correct!";
       u_int8_t *scoreMsg = "Your score is: ";
       u_int8_t *totalAttemptsMsg = "Total Attempts";
+
+      //convert userscore to char array
+      char userScoreMessage[log10(userScore)] + 1;
+      int userScoreCopy = userScore;
+      for(int i = log10(userScore) - 1; i >= 0; --i, userScoreCopy /= 10)
+      {
+        userScoreMessage[i] = (userScoreCopy % 10) + '0';
+      }
+
+      //convert problemsdone to char array
+      char problemsDoneMessage[log10(problemsDone)] + 1;
+      int problemsDoneCopy = problemsDone;
+      for(int i = log10(problemsDone) - 1; i >= 0; --i, problemsDoneCopy /= 10)
+      {
+        problemsDoneMessage[i] = (problemsDoneCopy % 10) + '0';
+      }
+
       BSP_LCD_DisplayStringAt(400, 380, scoreMsg, RIGHT_MODE); //align with bottom left of screen
-      BSP_LCD_DisplayStringAt(400, 400, userScore, RIGHT_MODE); //just below previous string
+      BSP_LCD_DisplayStringAt(400, 400, userScoreMessage, RIGHT_MODE); //just below previous string
       BSP_LCD_DisplayStringAt(400, 420, totalAttemptsMsg, RIGHT_MODE); //just below previous string
-      BSP_LCD_DisplayStringAt(400, 440, problemsDone, RIGHT_MODE); //just below previous string
+      BSP_LCD_DisplayStringAt(400, 440, problemsDoneMessage, RIGHT_MODE); //just below previous string
       if (chosenChoice != correctChoice)
       {
         // Display answer was incorrect
