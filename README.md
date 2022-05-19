@@ -1,6 +1,8 @@
-# rtes-final-project
+Morse Code Tutor for STM Discovery board
+RTES final project for Team -... .- -.
+Github: https://github.com/quaris628/rtes-final-project
 
-This project was made for the Visual Studio Code (VSC) IDE with the "stm32-for-vscode" extension, and used the STM32CubeMX program to generate the code specific to the STM discovery board.
+This project was made for use with the Visual Studio Code (VSC) IDE with the "stm32-for-vscode" extension installed, and used the STM32CubeMX program to generate the code specific to the STM discovery board.
 
 
 VSC can be installed from here:
@@ -15,11 +17,12 @@ To install the "stm32-for-vscode" extension for VSC:
 The STM32CubeMX code generation program can be installed from here:
  https://www.st.com/en/development-tools/stm32cubemx.html#get-software
 To be compatible with the VSC extension, you MUST select version 6.0.0 (as of Spring 2022)
+(This program is only necessary if the project is pulled fresh from github)
 
 
 How to build the project (no board necessary at this step):
 
-Use STM32CubeMX to generate code for the project:
+Use STM32CubeMX to generate code for the project (only necessary if the project is pulled fresh from github):
  - Select "Open existing projects"
  - Select the morse.ioc file in the project
  - Wait for the program to load
