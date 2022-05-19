@@ -43,3 +43,8 @@ How to set up the discovery board to run the project:
  - Connect the board to the computer via usb
  (no need for UART connections, they are never used)
  - Select "Flash STM32"
+
+
+Hardware Setup:
+  - Connect 4 buttons to D0-D3 with a 1kOhmn pull down resistor 
+      - Same configuration from class
